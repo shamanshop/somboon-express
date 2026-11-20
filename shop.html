@@ -329,7 +329,7 @@
     .b-info { background: var(--accent-soft); color: var(--accent); }
     .b-err { background: var(--danger-soft); color: var(--danger); }
 
-    /* ฟอร์มและปุ่ม (โหมดตัวอย่าง UI เท่านั้น) */
+    /* ฟอร์มและปุ่ม */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -377,7 +377,10 @@
     }
 
     .btn-primary { background: var(--accent); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger-soft { background: var(--danger-soft); color: var(--danger); border-color: #fecaca; }
     .btn-ghost { background: #fff; color: var(--text-main); border-color: #cbd5e1; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
     .demo-banner {
       margin-top: 12px;
@@ -392,6 +395,13 @@
 
     .demo-banner.show {
       display: block;
+    }
+
+    .status-msg {
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      min-height: 18px;
     }
 
     /* รองรับแท็บเล็ตและมือถือ */
@@ -437,7 +447,7 @@
     <aside class="sidebar" id="sidebar" aria-label="เมนูหลักผู้ดูแลระบบ">
       <div class="brand">
         <div class="brand-title">SOMBOON EXPRESS</div>
-        <div class="brand-sub">ระบบหลังบ้านผู้ดูแล (ขั้นที่ 1 • UI)</div>
+        <div class="brand-sub">ระบบหลังบ้านผู้ดูแล (เตรียมเชื่อมหน้าบ้าน)</div>
       </div>
 
       <nav class="nav-list" id="navList">
@@ -452,8 +462,8 @@
       </nav>
 
       <div class="sidebar-foot">
-        โหมดต้นแบบโครงหน้าจอ (ข้อมูลตัวอย่าง)<br />
-        ยังไม่เชื่อม API หรือฐานข้อมูล
+        โหมดเตรียมโครงสร้างหลังบ้าน<br />
+        ยังไม่เชื่อม Backend หรือฐานข้อมูลจริง
       </div>
     </aside>
 
@@ -466,7 +476,7 @@
         </div>
         <div class="topbar-right">
           <span class="pill">ผู้ดูแลระบบ: Admin</span>
-          <span class="pill warn">ขั้นที่ 1 • โครงสร้าง UI</span>
+          <span class="pill warn">พร้อมรองรับหน้าบ้าน</span>
         </div>
       </header>
 
@@ -476,36 +486,36 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">ภาพรวมระบบหลังบ้าน (Dashboard)</h2>
-              <p class="section-desc">สรุปสถานะคำสั่งซื้อ ลูกค้า พัสดุ และการเงินเบื้องต้น (ข้อมูลตัวอย่างสำหรับตรวจสอบหน้าจอ)</p>
+              <p class="section-desc">สรุปข้อมูลลูกค้า เครดิต คำสั่งซื้อ และธุรกรรมที่เชื่อมโยงกันในระบบ</p>
             </div>
           </div>
 
           <div class="kpi-grid">
             <div class="card">
-              <div class="kpi-label">คำสั่งซื้อวันนี้ (Orders)</div>
-              <div class="kpi-val">24 รายการ</div>
-              <div class="kpi-note">+12% จากเมื่อวาน (ตัวอย่าง)</div>
+              <div class="kpi-label">คำสั่งซื้อทั้งหมด (Orders)</div>
+              <div class="kpi-val" id="kpiOrdersCount">0 รายการ</div>
+              <div class="kpi-note" id="kpiPendingNote">รอรับออเดอร์ 0 รายการ</div>
             </div>
             <div class="card">
-              <div class="kpi-label">ลูกค้าที่ใช้งานอยู่ (Customers)</div>
-              <div class="kpi-val">148 ราย</div>
-              <div class="kpi-note">ลูกค้ารายใหม่ +6 รายสัปดาห์นี้</div>
+              <div class="kpi-label">ลูกค้าในระบบ (Customers)</div>
+              <div class="kpi-val" id="kpiCustomersCount">0 ราย</div>
+              <div class="kpi-note">เชื่อมเครดิตกับบัญชีลูกค้า</div>
             </div>
             <div class="card">
-              <div class="kpi-label">พัสดุระหว่างขนส่ง (Parcels)</div>
-              <div class="kpi-val">39 กล่อง</div>
-              <div class="kpi-note">ถึงโกดังปลายทางแล้ว 11 กล่อง</div>
+              <div class="kpi-label">เครดิตรวมของลูกค้า (Wallet)</div>
+              <div class="kpi-val" id="kpiTotalCredit">฿0.00</div>
+              <div class="kpi-note">หักเมื่อแอดมินกดรับออเดอร์เท่านั้น</div>
             </div>
             <div class="card">
-              <div class="kpi-label">ยอดรับชำระวันนี้ (Payments)</div>
-              <div class="kpi-val">฿84,500</div>
-              <div class="kpi-note">รอตรวจสอบสลิป 3 รายการ</div>
+              <div class="kpi-label">รายการธุรกรรม (Payments)</div>
+              <div class="kpi-val" id="kpiPaymentsCount">0 รายการ</div>
+              <div class="kpi-note">บันทึกอัตโนมัติเมื่อปรับ/หักเครดิต</div>
             </div>
           </div>
 
           <div class="two-col">
             <div class="card">
-              <h3 class="card-title">รายการคำสั่งซื้อล่าสุด (ตัวอย่าง)</h3>
+              <h3 class="card-title">รายการคำสั่งซื้อล่าสุด</h3>
               <div class="table-wrap">
                 <table>
                   <thead>
@@ -516,58 +526,24 @@
                       <th>สถานะ</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>SB-20261120-01</td>
-                      <td>คุณกิตติพงษ์</td>
-                      <td>฿12,450</td>
-                      <td><span class="badge b-ok">ชำระแล้ว</span></td>
-                    </tr>
-                    <tr>
-                      <td>SB-20261120-02</td>
-                      <td>ร้านปิ่นเกล้า มิวสิค</td>
-                      <td>฿6,820</td>
-                      <td><span class="badge b-wait">รอตรวจสอบยอด</span></td>
-                    </tr>
-                    <tr>
-                      <td>SB-20261120-03</td>
-                      <td>คุณอรอนงค์</td>
-                      <td>฿3,190</td>
-                      <td><span class="badge b-info">กำลังสั่งซื้อจากจีน</span></td>
-                    </tr>
-                  </tbody>
+                  <tbody id="dashOrdersBody"></tbody>
                 </table>
               </div>
             </div>
 
             <div class="card">
-              <h3 class="card-title">เรทขนส่งปัจจุบัน (ตัวอย่าง)</h3>
+              <h3 class="card-title">เครดิตลูกค้าล่าสุด</h3>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>ประเภทขนส่ง</th>
-                      <th>เรทตัวอย่าง</th>
+                      <th>รหัสลูกค้า</th>
+                      <th>ชื่อลูกค้า</th>
+                      <th>เครดิตคงเหลือ</th>
                       <th>สถานะ</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>เรทแลกเปลี่ยน CNY → THB</td>
-                      <td>5.35 บาท / หยวน</td>
-                      <td><span class="badge b-ok">ใช้งาน</span></td>
-                    </tr>
-                    <tr>
-                      <td>ขนส่งทางรถ (ต่อ กก.)</td>
-                      <td>45 บาท / กก.</td>
-                      <td><span class="badge b-ok">ใช้งาน</span></td>
-                    </tr>
-                    <tr>
-                      <td>ขนส่งทางรถ (ต่อ CBM)</td>
-                      <td>5,900 บาท / CBM</td>
-                      <td><span class="badge b-ok">ใช้งาน</span></td>
-                    </tr>
-                  </tbody>
+                  <tbody id="dashCustomersBody"></tbody>
                 </table>
               </div>
             </div>
@@ -579,9 +555,36 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">จัดการคำสั่งซื้อ (Orders)</h2>
-              <p class="section-desc">โครงสร้างตารางติดตามสถานะคำสั่งซื้อของลูกค้า (ข้อมูลตัวอย่าง)</p>
+              <p class="section-desc">เมื่อลูกค้าส่งออเดอร์ เครดิตยังไม่ถูกหัก — เครดิตจะถูกหักเต็มจำนวนเมื่อแอดมินกดรับออเดอร์เท่านั้น</p>
             </div>
           </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <h3 class="card-title">สร้างคำสั่งซื้อทดสอบ (จำลองออเดอร์จากลูกค้า)</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="orderCustomerSelect">เลือกลูกค้า</label>
+                <select id="orderCustomerSelect"></select>
+              </div>
+              <div class="field">
+                <label for="orderAmountInput">ยอดสั่งซื้อเต็มจำนวน (บาท)</label>
+                <input id="orderAmountInput" type="number" min="1" step="0.01" placeholder="เช่น 1500.00" />
+              </div>
+              <div class="field">
+                <label for="orderDescInput">รายละเอียดสินค้า / อ้างอิง</label>
+                <input id="orderDescInput" type="text" placeholder="เช่น สั่งซื้อสินค้า 1688 ชุดตัวอย่าง" />
+              </div>
+              <div class="field">
+                <label for="orderRefUrlInput">ลิงก์/อ้างอิงหน้าบ้าน (ถ้ามี)</label>
+                <input id="orderRefUrlInput" type="text" placeholder="https://..." />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" id="createOrderBtn">ส่งคำสั่งซื้อ (ยังไม่หักเครดิต)</button>
+            </div>
+            <div class="status-msg" id="orderStatusMsg"></div>
+          </div>
+
           <div class="card">
             <h3 class="card-title">รายการคำสั่งซื้อทั้งหมด</h3>
             <div class="table-wrap">
@@ -590,38 +593,14 @@
                   <tr>
                     <th>รหัสออเดอร์</th>
                     <th>ลูกค้า</th>
-                    <th>จำนวนรายการ</th>
+                    <th>รายละเอียด</th>
                     <th>ยอดรวม (THB)</th>
+                    <th>เครดิตลูกค้าปัจจุบัน</th>
                     <th>สถานะออเดอร์</th>
-                    <th>วันที่สร้าง</th>
+                    <th>การจัดการ</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>ORD-1041</td>
-                    <td>คุณกิตติพงษ์</td>
-                    <td>4 สเปค</td>
-                    <td>12,450.00</td>
-                    <td><span class="badge b-ok">ดำเนินการแล้ว</span></td>
-                    <td>20/11/2026</td>
-                  </tr>
-                  <tr>
-                    <td>ORD-1042</td>
-                    <td>ร้านปิ่นเกล้า มิวสิค</td>
-                    <td>2 สเปค</td>
-                    <td>6,820.00</td>
-                    <td><span class="badge b-wait">รอยืนยัน</span></td>
-                    <td>20/11/2026</td>
-                  </tr>
-                  <tr>
-                    <td>ORD-1043</td>
-                    <td>คุณอรอนงค์</td>
-                    <td>1 สเปค</td>
-                    <td>3,190.00</td>
-                    <td><span class="badge b-info">กำลังจัดหาสินค้า</span></td>
-                    <td>19/11/2026</td>
-                  </tr>
-                </tbody>
+                <tbody id="ordersTableBody"></tbody>
               </table>
             </div>
           </div>
@@ -631,10 +610,39 @@
         <section class="section" id="page-customers">
           <div class="section-head">
             <div>
-              <h2 class="section-title">รายชื่อลูกค้า (Customers)</h2>
-              <p class="section-desc">โครงสร้างข้อมูลลูกค้าและยอดเครดิตคงเหลือ (ข้อมูลตัวอย่าง)</p>
+              <h2 class="section-title">รายชื่อลูกค้าและเครดิต (Customers)</h2>
+              <p class="section-desc">เพิ่ม/ลดเครดิตของลูกค้า และเตรียมช่องทางเชื่อมไปยังระบบหน้าบ้าน</p>
             </div>
           </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <h3 class="card-title">ปรับเครดิตลูกค้า (เพิ่ม / ลด)</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="creditCustomerSelect">เลือกลูกค้า</label>
+                <select id="creditCustomerSelect"></select>
+              </div>
+              <div class="field">
+                <label for="creditAmountInput">จำนวนเครดิต (บาท)</label>
+                <input id="creditAmountInput" type="number" min="0.01" step="0.01" placeholder="เช่น 500.00" />
+              </div>
+              <div class="field">
+                <label for="creditNoteInput">หมายเหตุการปรับเครดิต</label>
+                <input id="creditNoteInput" type="text" placeholder="เช่น เติมเครดิตโอนเงิน / ปรับลดยอด" />
+              </div>
+              <div class="field">
+                <label for="frontUrlInput">ลิงก์ระบบหน้าบ้าน (สำหรับเปิดเชื่อมลูกค้า)</label>
+                <input id="frontUrlInput" type="text" value="./index.html" placeholder="เช่น ./index.html หรือลิงก์หน้าบ้าน" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-success" type="button" id="addCreditBtn">+ เพิ่มเครดิต</button>
+              <button class="btn btn-danger-soft" type="button" id="deductCreditBtn">- ลดเครดิต</button>
+              <button class="btn btn-ghost" type="button" id="openFrontendBtn">↗ ไปยังระบบหน้าบ้าน</button>
+            </div>
+            <div class="status-msg" id="creditStatusMsg"></div>
+          </div>
+
           <div class="card">
             <h3 class="card-title">บัญชีลูกค้าในระบบ</h3>
             <div class="table-wrap">
@@ -643,34 +651,13 @@
                   <tr>
                     <th>รหัสลูกค้า</th>
                     <th>ชื่อลูกค้า / ร้านค้า</th>
-                    <th>ช่องทางติดต่อ</th>
+                    <th>บัญชี/ช่องทาง</th>
                     <th>เครดิตคงเหลือ</th>
                     <th>สถานะบัญชี</th>
+                    <th>ลัดปรับเครดิต / หน้าบ้าน</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>CUS-001</td>
-                    <td>คุณกิตติพงษ์</td>
-                    <td>08x-xxx-1122</td>
-                    <td>฿18,500.00</td>
-                    <td><span class="badge b-ok">ปกติ</span></td>
-                  </tr>
-                  <tr>
-                    <td>CUS-002</td>
-                    <td>ร้านปิ่นเกล้า มิวสิค</td>
-                    <td>Line: @pingklao</td>
-                    <td>฿4,200.00</td>
-                    <td><span class="badge b-ok">ปกติ</span></td>
-                  </tr>
-                  <tr>
-                    <td>CUS-003</td>
-                    <td>คุณอรอนงค์</td>
-                    <td>09x-xxx-8899</td>
-                    <td>฿0.00</td>
-                    <td><span class="badge b-wait">รอเติมเครดิต</span></td>
-                  </tr>
-                </tbody>
+                <tbody id="customersTableBody"></tbody>
               </table>
             </div>
           </div>
@@ -681,7 +668,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">รายการสินค้า (Products)</h2>
-              <p class="section-desc">โครงสร้างแสดงรายการสินค้าที่ดึงหรือบันทึกไว้ (ข้อมูลตัวอย่าง ยังไม่เชื่อม API ดึงข้อมูลจริง)</p>
+              <p class="section-desc">โครงสร้างแสดงรายการสินค้าที่ดึงหรือบันทึกไว้ (รอเชื่อมฟังก์ชันและ API ในขั้นถัดไป)</p>
             </div>
           </div>
           <div class="card">
@@ -723,7 +710,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">ติดตามพัสดุ (Parcels)</h2>
-              <p class="section-desc">โครงสร้างติดตามเลขพัสดุจีน-ไทย น้ำหนัก และขนาดกล่อง (ข้อมูลตัวอย่าง)</p>
+              <p class="section-desc">โครงสร้างติดตามเลขพัสดุจีน-ไทย น้ำหนัก และขนาดกล่อง (รอเชื่อมข้อมูลในขั้นถัดไป)</p>
             </div>
           </div>
           <div class="card">
@@ -765,38 +752,24 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">การเงินและการชำระเงิน (Payments)</h2>
-              <p class="section-desc">โครงสร้างรายการเติมเงิน หักยอด และตรวจสอบการชำระเงิน (ข้อมูลตัวอย่าง)</p>
+              <p class="section-desc">บันทึกประวัติการเพิ่ม/ลดเครดิต และการหักเครดิตเมื่อแอดมินรับออเดอร์</p>
             </div>
           </div>
           <div class="card">
-            <h3 class="card-title">ประวัติธุรกรรมทางการเงิน (ตัวอย่าง)</h3>
+            <h3 class="card-title">ประวัติธุรกรรมเครดิตและคำสั่งซื้อ</h3>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>รหัสรายการ</th>
                     <th>ลูกค้า</th>
+                    <th>อ้างอิง</th>
                     <th>ประเภทรายการ</th>
                     <th>จำนวนเงิน</th>
                     <th>สถานะ</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>PAY-5001</td>
-                    <td>คุณกิตติพงษ์</td>
-                    <td>เติมเงินเข้าระบบ</td>
-                    <td>+฿20,000.00</td>
-                    <td><span class="badge b-ok">ยืนยันแล้ว</span></td>
-                  </tr>
-                  <tr>
-                    <td>PAY-5002</td>
-                    <td>ร้านปิ่นเกล้า มิวสิค</td>
-                    <td>ชำระค่าสั่งซื้อ</td>
-                    <td>-฿6,820.00</td>
-                    <td><span class="badge b-wait">รอตรวจสลิป</span></td>
-                  </tr>
-                </tbody>
+                <tbody id="paymentsTableBody"></tbody>
               </table>
             </div>
           </div>
@@ -807,7 +780,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">อัตราค่าขนส่งและเรท (Shipping Rates)</h2>
-              <p class="section-desc">โครงสร้างฟอร์มกำหนดเรทค่าขนส่งและอัตราแลกเปลี่ยน (ขั้นที่ 1 แสดงผลตัวอย่างเท่านั้น)</p>
+              <p class="section-desc">โครงสร้างฟอร์มกำหนดเรทค่าขนส่งและอัตราแลกเปลี่ยน (รอเชื่อมบันทึกจริงในขั้นถัดไป)</p>
             </div>
           </div>
           <div class="card">
@@ -826,8 +799,8 @@
                 <input id="rateCbm" type="number" step="50" value="5900" />
               </div>
               <div class="field">
-                <label for="rateAir">ค่าขนส่งทางอากาศต่อกิโลกรัม (บาท/กก.)</label>
-                <input id="rateAir" type="number" step="10" value="320" />
+                <label for="rateSea">ค่าขนส่งทางเรือต่อคิวบิกเมตร (บาท/CBM)</label>
+                <input id="rateSea" type="number" step="50" value="4500" />
               </div>
             </div>
             <div class="btn-row">
@@ -842,26 +815,26 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">ตั้งค่าระบบ (Settings)</h2>
-              <p class="section-desc">โครงสร้างการตั้งค่าพื้นฐานของระบบหลังบ้าน SOMBOON EXPRESS (ขั้นที่ 1 ยังไม่เชื่อมระบบจริง)</p>
+              <p class="section-desc">โครงสร้างการตั้งค่าพื้นฐานของระบบหลังบ้าน SOMBOON EXPRESS</p>
             </div>
           </div>
           <div class="card">
-            <h3 class="card-title">ข้อมูลระบบพื้นฐาน (ตัวอย่าง)</h3>
+            <h3 class="card-title">ข้อมูลระบบพื้นฐาน</h3>
             <div class="form-grid">
               <div class="field">
                 <label for="setBrand">ชื่อระบบ / แบรนด์</label>
                 <input id="setBrand" type="text" value="SOMBOON EXPRESS" />
               </div>
               <div class="field">
-                <label for="setMode">สถานะการทำงานของหน้านี้</label>
+                <label for="setMode">โหมดการทำงานปัจจุบัน</label>
                 <select id="setMode">
-                  <option value="ui-stage-1" selected>ขั้นที่ 1: โครงสร้างหน้าจอและหน้าตา UI</option>
-                  <option value="pending-api">รอเชื่อมต่อระบบหลังบ้านในขั้นถัดไป</option>
+                  <option value="admin-ready-local" selected>เตรียมโครงสร้างหลังบ้าน & เชื่อมโยงข้อมูล (ยังไม่เชื่อม DB จริง)</option>
+                  <option value="pending-api">รอเชื่อมต่อ API / ฐานข้อมูลในขั้นถัดไป</option>
                 </select>
               </div>
             </div>
             <div class="btn-row">
-              <button class="btn btn-ghost" type="button" id="previewSetBtn">ดูสรุปค่าในฟอร์ม (โหมดตัวอย่าง)</button>
+              <button class="btn btn-ghost" type="button" id="previewSetBtn">ดูสรุปค่าในฟอร์ม</button>
             </div>
             <div class="demo-banner" id="setBanner"></div>
           </div>
@@ -875,7 +848,7 @@
       const pageMeta = {
         dashboard: 'Dashboard',
         orders: 'Orders — จัดการคำสั่งซื้อ',
-        customers: 'Customers — รายชื่อลูกค้า',
+        customers: 'Customers — รายชื่อลูกค้าและเครดิต',
         products: 'Products — รายการสินค้า',
         parcels: 'Parcels — ติดตามพัสดุ',
         payments: 'Payments — การเงินและการชำระเงิน',
@@ -883,6 +856,408 @@
         settings: 'Settings — ตั้งค่าระบบ'
       };
 
+      /* =====================================================================
+         1. API & DATABASE ADAPTER INTERFACE (เตรียมไว้สำหรับเชื่อมอนาคต)
+         ตอนนี้ใช้ LocalMemory/Mock Adapter ยังไม่ยิง Backend หรือ DB จริง
+      ===================================================================== */
+      const AdminDataAdapter = {
+        mode: 'local-mock', // เปลี่ยนเป็น 'api-db' ได้ในอนาคตเมื่อพร้อมเชื่อมจริง
+        async getSnapshot(state) {
+          return { ok: true, mode: this.mode, data: state };
+        },
+        async adjustCustomerCredit(payload) {
+          return { ok: true, mode: this.mode, payload };
+        },
+        async createOrder(order) {
+          return { ok: true, mode: this.mode, order };
+        },
+        async acceptOrderAndDeduct(order, payment) {
+          return { ok: true, mode: this.mode, order, payment };
+        }
+      };
+
+      /* =====================================================================
+         2. โครงสร้างข้อมูลกลาง (เชื่อม Customers <-> Credit <-> Orders <-> Payments)
+      ===================================================================== */
+      const adminState = {
+        frontendUrl: './index.html',
+        customers: [
+          { id: 'CUS-001', key: 'kittipong@somboon.local', name: 'คุณกิตติพงษ์', contact: '08x-xxx-1122', credit: 18500, status: 'ปกติ' },
+          { id: 'CUS-002', key: 'pingklao@somboon.local', name: 'ร้านปิ่นเกล้า มิวสิค', contact: 'Line: @pingklao', credit: 4200, status: 'ปกติ' },
+          { id: 'CUS-003', key: 'ornanong@somboon.local', name: 'คุณอรอนงค์', contact: '09x-xxx-8899', credit: 0, status: 'รอเติมเครดิต' }
+        ],
+        orders: [
+          {
+            id: 'ORD-1041',
+            customerId: 'CUS-001',
+            customerName: 'คุณกิตติพงษ์',
+            detail: '4 สเปค (ชุดตัวอย่าง)',
+            amount: 12450,
+            status: 'รับออเดอร์แล้ว (หักเครดิตแล้ว)',
+            creditDeducted: true,
+            refUrl: '',
+            createdAt: '20/11/2026'
+          },
+          {
+            id: 'ORD-1042',
+            customerId: 'CUS-002',
+            customerName: 'ร้านปิ่นเกล้า มิวสิค',
+            detail: '2 สเปค (รอแอดมินรับออเดอร์)',
+            amount: 3500,
+            status: 'รอรับออเดอร์',
+            creditDeducted: false,
+            refUrl: '',
+            createdAt: '20/11/2026'
+          },
+          {
+            id: 'ORD-1043',
+            customerId: 'CUS-003',
+            customerName: 'คุณอรอนงค์',
+            detail: '1 สเปค (เครดิตยังไม่พอ)',
+            amount: 3190,
+            status: 'รอรับออเดอร์',
+            creditDeducted: false,
+            refUrl: '',
+            createdAt: '19/11/2026'
+          }
+        ],
+        payments: [
+          { id: 'PAY-5001', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: '-', type: 'เพิ่มเครดิต', amount: 20000, status: 'ยืนยันแล้ว' },
+          { id: 'PAY-5002', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: 'ORD-1041', type: 'หักเครดิต (รับออเดอร์)', amount: -12450, status: 'หักแล้ว' }
+        ]
+      };
+
+      const processingOrderIds = new Set();
+
+      function money(n) {
+        return Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+      }
+
+      function findCustomerById(customerId) {
+        return adminState.customers.find((c) => c.id === customerId) || null;
+      }
+
+      function refreshCustomerStatus(customer) {
+        if (!customer) return;
+        customer.status = Number(customer.credit) > 0 ? 'ปกติ' : 'รอเติมเครดิต';
+      }
+
+      function buildFrontendLink(customer, orderId = '') {
+        const base = (adminState.frontendUrl || './index.html').trim() || './index.html';
+        const sep = base.includes('?') ? '&' : '?';
+        const params = [];
+        if (customer?.key) params.push('account=' + encodeURIComponent(customer.key));
+        if (orderId) params.push('order=' + encodeURIComponent(orderId));
+        return params.length ? `${base}${sep}${params.join('&')}` : base;
+      }
+
+      function openFrontendPortal(customerId = '', orderId = '') {
+        const targetCustomerId = customerId || $('creditCustomerSelect')?.value || adminState.customers[0]?.id || '';
+        const customer = findCustomerById(targetCustomerId);
+        const targetUrl = buildFrontendLink(customer, orderId);
+        if ($('creditStatusMsg')) {
+          $('creditStatusMsg').style.color = '#2563eb';
+          $('creditStatusMsg').textContent = `ลิงก์เชื่อมหน้าบ้านสำหรับ ${customer ? customer.name : 'ลูกค้า'}: ${targetUrl}`;
+        }
+        window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      }
+
+      async function adjustCredit(customerId, deltaSign, rawAmount, rawNote) {
+        const msgEl = $('creditStatusMsg');
+        const customer = findCustomerById(customerId);
+        const amount = Number(rawAmount);
+
+        if (!customer) {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณาเลือกลูกค้าก่อน'; }
+          return;
+        }
+        if (!Number.isFinite(amount) || amount <= 0) {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณากรอกจำนวนเครดิตที่มากกว่า 0 บาท'; }
+          return;
+        }
+
+        const currentCredit = Number(customer.credit) || 0;
+        if (deltaSign < 0 && currentCredit < amount) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `ลดเครดิตไม่ได้: ${customer.name} มีเครดิตคงเหลือ ฿${money(currentCredit)} (น้อยกว่า ฿${money(amount)})`;
+          }
+          return;
+        }
+
+        const nextCredit = +(currentCredit + (deltaSign * amount)).toFixed(2);
+        customer.credit = nextCredit;
+        refreshCustomerStatus(customer);
+
+        const payEntry = {
+          id: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
+          customerId: customer.id,
+          customerName: customer.name,
+          refId: '-',
+          type: deltaSign > 0 ? 'เพิ่มเครดิต' : 'ลดเครดิต',
+          amount: deltaSign > 0 ? amount : -amount,
+          status: (rawNote || '').trim() || 'ปรับเครดิตโดยผู้ดูแล'
+        };
+        adminState.payments.unshift(payEntry);
+
+        await AdminDataAdapter.adjustCustomerCredit({
+          customerId: customer.id,
+          delta: deltaSign * amount,
+          creditAfter: customer.credit,
+          payment: payEntry
+        });
+
+        if ($('creditAmountInput')) $('creditAmountInput').value = '';
+        if ($('creditNoteInput')) $('creditNoteInput').value = '';
+
+        if (msgEl) {
+          msgEl.style.color = '#059669';
+          msgEl.textContent = `${deltaSign > 0 ? 'เพิ่ม' : 'ลด'}เครดิตให้ ${customer.name} จำนวน ฿${money(amount)} แล้ว (คงเหลือ ฿${money(customer.credit)})`;
+        }
+        renderAll();
+      }
+
+      /* =====================================================================
+         3. กติกาคำสั่งซื้อ & การรับออเดอร์ & หักเครดิต (ตามข้อกำหนด)
+         - ส่งออเดอร์แล้วยังไม่หักเครดิต
+         - ลูกค้าต้องมีเครดิตเพียงพอสำหรับยอดสั่งซื้อเต็มจำนวน
+         - หักเครดิตเฉพาะเมื่อผู้ดูแลกดรับออเดอร์เท่านั้น
+         - ป้องกันการหักเครดิตซ้ำ
+         - หากยังไม่รับออเดอร์ เครดิตต้องไม่เปลี่ยนแปลง
+      ===================================================================== */
+      async function createOrderFromAdmin() {
+        const msgEl = $('orderStatusMsg');
+        const customerId = $('orderCustomerSelect')?.value;
+        const amount = Number($('orderAmountInput')?.value);
+        const detail = ($('orderDescInput')?.value || '').trim() || 'คำสั่งซื้อสินค้า';
+        const refUrl = ($('orderRefUrlInput')?.value || '').trim();
+        const customer = findCustomerById(customerId);
+
+        if (!customer) {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณาเลือกลูกค้า'; }
+          return;
+        }
+        if (!Number.isFinite(amount) || amount <= 0) {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณากรอกยอดสั่งซื้อที่มากกว่า 0 บาท'; }
+          return;
+        }
+
+        const newOrder = {
+          id: 'ORD-' + Math.floor(1050 + Math.random() * 8900),
+          customerId: customer.id,
+          customerName: customer.name,
+          detail,
+          amount,
+          status: 'รอรับออเดอร์', // ส่งออเดอร์แล้วยังไม่หักเครดิต
+          creditDeducted: false,
+          refUrl,
+          createdAt: new Date().toLocaleDateString('th-TH')
+        };
+
+        adminState.orders.unshift(newOrder);
+        await AdminDataAdapter.createOrder(newOrder);
+
+        if ($('orderAmountInput')) $('orderAmountInput').value = '';
+        if ($('orderDescInput')) $('orderDescInput').value = '';
+        if ($('orderRefUrlInput')) $('orderRefUrlInput').value = '';
+
+        if (msgEl) {
+          msgEl.style.color = '#d97706';
+          msgEl.textContent = `สร้างออเดอร์ ${newOrder.id} ยอด ฿${money(amount)} แล้ว — เครดิตของ ${customer.name} ยังไม่ถูกหัก (รอแอดมินกดรับออเดอร์)`;
+        }
+        renderAll();
+      }
+
+      async function acceptOrder(orderId) {
+        const msgEl = $('orderStatusMsg');
+        if (!orderId || processingOrderIds.has(orderId)) return;
+
+        const order = adminState.orders.find((o) => o.id === orderId);
+        if (!order) return;
+
+        // ป้องกันการหักเครดิตซ้ำ
+        if (order.creditDeducted === true || order.status !== 'รอรับออเดอร์') {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `ออเดอร์ ${order.id} ถูกดำเนินการหรือหักเครดิตไปแล้ว ไม่สามารถหักซ้ำได้`;
+          }
+          return;
+        }
+
+        const customer = findCustomerById(order.customerId);
+        const orderAmount = Number(order.amount) || 0;
+        const currentCredit = Number(customer?.credit) || 0;
+
+        // ลูกค้าต้องมีเครดิตเพียงพอสำหรับยอดสั่งซื้อเต็มจำนวน (ห้ามหักบางส่วน)
+        if (!customer || currentCredit < orderAmount) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `รับออเดอร์ ${order.id} ไม่ได้: เครดิตคงเหลือ ฿${money(currentCredit)} ไม่เพียงพอกับยอดเต็มจำนวน ฿${money(orderAmount)} (กรุณาเติมเครดิตก่อน)`;
+          }
+          return;
+        }
+
+        processingOrderIds.add(orderId);
+        renderAll();
+
+        try {
+          customer.credit = +(currentCredit - orderAmount).toFixed(2);
+          refreshCustomerStatus(customer);
+          order.creditDeducted = true;
+          order.status = 'รับออเดอร์แล้ว (หักเครดิตแล้ว)';
+
+          const paymentRecord = {
+            id: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
+            customerId: customer.id,
+            customerName: customer.name,
+            refId: order.id,
+            type: 'หักเครดิต (รับออเดอร์)',
+            amount: -orderAmount,
+            status: 'หักเต็มจำนวนแล้ว'
+          };
+          adminState.payments.unshift(paymentRecord);
+
+          await AdminDataAdapter.acceptOrderAndDeduct(order, paymentRecord);
+
+          if (msgEl) {
+            msgEl.style.color = '#059669';
+            msgEl.textContent = `รับออเดอร์ ${order.id} สำเร็จ — หักเครดิตเต็มจำนวน ฿${money(orderAmount)} ของ ${customer.name} แล้ว (คงเหลือ ฿${money(customer.credit)})`;
+          }
+        } finally {
+          processingOrderIds.delete(orderId);
+          renderAll();
+        }
+      }
+
+      /* =====================================================================
+         4. การเรนเดอร์ข้อมูลเชื่อมโยงกันทุกตารางและการ์ด
+      ===================================================================== */
+      function renderCustomerSelects() {
+        const opts = adminState.customers
+          .map((c) => `<option value="${esc(c.id)}">${esc(c.id)} — ${esc(c.name)} (เครดิต ฿${money(c.credit)})</option>`)
+          .join('');
+
+        const prevCreditVal = $('creditCustomerSelect')?.value;
+        const prevOrderVal = $('orderCustomerSelect')?.value;
+
+        if ($('creditCustomerSelect')) {
+          $('creditCustomerSelect').innerHTML = opts;
+          if (prevCreditVal && findCustomerById(prevCreditVal)) $('creditCustomerSelect').value = prevCreditVal;
+        }
+        if ($('orderCustomerSelect')) {
+          $('orderCustomerSelect').innerHTML = opts;
+          if (prevOrderVal && findCustomerById(prevOrderVal)) $('orderCustomerSelect').value = prevOrderVal;
+        }
+      }
+
+      function renderAll() {
+        renderCustomerSelects();
+
+        const totalCredit = adminState.customers.reduce((sum, c) => sum + (Number(c.credit) || 0), 0);
+        const pendingOrders = adminState.orders.filter((o) => o.status === 'รอรับออเดอร์');
+
+        if ($('kpiOrdersCount')) $('kpiOrdersCount').textContent = `${adminState.orders.length} รายการ`;
+        if ($('kpiPendingNote')) $('kpiPendingNote').textContent = `รอรับออเดอร์ ${pendingOrders.length} รายการ (ยังไม่หักเครดิต)`;
+        if ($('kpiCustomersCount')) $('kpiCustomersCount').textContent = `${adminState.customers.length} ราย`;
+        if ($('kpiTotalCredit')) $('kpiTotalCredit').textContent = `฿${money(totalCredit)}`;
+        if ($('kpiPaymentsCount')) $('kpiPaymentsCount').textContent = `${adminState.payments.length} รายการ`;
+
+        if ($('dashOrdersBody')) {
+          $('dashOrdersBody').innerHTML = adminState.orders.slice(0, 5).map((o) => {
+            const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
+            return `<tr>
+              <td>${esc(o.id)}</td>
+              <td>${esc(o.customerName)}</td>
+              <td>฿${money(o.amount)}</td>
+              <td><span class="badge ${badgeClass}">${esc(o.status)}</span></td>
+            </tr>`;
+          }).join('');
+        }
+
+        if ($('dashCustomersBody')) {
+          $('dashCustomersBody').innerHTML = adminState.customers.slice(0, 5).map((c) => {
+            const bClass = Number(c.credit) > 0 ? 'b-ok' : 'b-wait';
+            return `<tr>
+              <td>${esc(c.id)}</td>
+              <td>${esc(c.name)}</td>
+              <td>฿${money(c.credit)}</td>
+              <td><span class="badge ${bClass}">${esc(c.status)}</span></td>
+            </tr>`;
+          }).join('');
+        }
+
+        if ($('customersTableBody')) {
+          $('customersTableBody').innerHTML = adminState.customers.map((c) => {
+            const bClass = Number(c.credit) > 0 ? 'b-ok' : 'b-wait';
+            return `<tr>
+              <td>${esc(c.id)}</td>
+              <td>${esc(c.name)}</td>
+              <td>${esc(c.contact)}</td>
+              <td><strong>฿${money(c.credit)}</strong></td>
+              <td><span class="badge ${bClass}">${esc(c.status)}</span></td>
+              <td>
+                <button type="button" class="btn btn-ghost js-select-customer" data-cid="${esc(c.id)}" style="padding:5px 10px;font-size:12px;">เลือกปรับเครดิต</button>
+                <button type="button" class="btn btn-primary js-go-frontend" data-cid="${esc(c.id)}" style="padding:5px 10px;font-size:12px;">เปิดหน้าบ้าน</button>
+              </td>
+            </tr>`;
+          }).join('');
+        }
+
+        if ($('ordersTableBody')) {
+          $('ordersTableBody').innerHTML = adminState.orders.map((o) => {
+            const cust = findCustomerById(o.customerId);
+            const custCredit = Number(cust?.credit) || 0;
+            const isWaiting = o.status === 'รอรับออเดอร์' && !o.creditDeducted;
+            const isBusy = processingOrderIds.has(o.id);
+            const canAfford = custCredit >= (Number(o.amount) || 0);
+            const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
+
+            let actionHtml = `<span class="badge b-info">หักเครดิตแล้ว</span>`;
+            if (isWaiting) {
+              actionHtml = `<button type="button" class="btn btn-success js-accept-order" data-oid="${esc(o.id)}" ${isBusy ? 'disabled' : ''} style="padding:5px 10px;font-size:12px;">${isBusy ? 'กำลังรับ...' : 'รับออเดอร์ & หักเครดิต'}</button>`;
+              if (!canAfford) {
+                actionHtml += ` <span class="badge b-err">เครดิตไม่พอ</span>`;
+              }
+            }
+
+            return `<tr>
+              <td>${esc(o.id)}</td>
+              <td>${esc(o.customerName)}</td>
+              <td>${esc(o.detail)}</td>
+              <td>฿${money(o.amount)}</td>
+              <td>฿${money(custCredit)}</td>
+              <td><span class="badge ${badgeClass}">${esc(o.status)}</span></td>
+              <td>${actionHtml}</td>
+            </tr>`;
+          }).join('');
+        }
+
+        if ($('paymentsTableBody')) {
+          $('paymentsTableBody').innerHTML = adminState.payments.map((p) => {
+            const amt = Number(p.amount) || 0;
+            const color = amt >= 0 ? '#059669' : '#dc2626';
+            const sign = amt >= 0 ? '+' : '-';
+            return `<tr>
+              <td>${esc(p.id)}</td>
+              <td>${esc(p.customerName)}</td>
+              <td>${esc(p.refId)}</td>
+              <td>${esc(p.type)}</td>
+              <td style="color:${color};font-weight:600;">${sign}฿${money(Math.abs(amt))}</td>
+              <td><span class="badge b-ok">${esc(p.status)}</span></td>
+            </tr>`;
+          }).join('');
+        }
+      }
+
+      /* =====================================================================
+         5. การสลับเมนูและ Event Listener
+      ===================================================================== */
       const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
       const sections = Array.from(document.querySelectorAll('.section'));
       const topTitle = document.getElementById('topTitle');
@@ -931,6 +1306,53 @@
 
       backdrop.addEventListener('click', closeDrawer);
 
+      $('addCreditBtn')?.addEventListener('click', () => {
+        adjustCredit(
+          $('creditCustomerSelect').value,
+          1,
+          $('creditAmountInput').value,
+          $('creditNoteInput').value
+        );
+      });
+
+      $('deductCreditBtn')?.addEventListener('click', () => {
+        adjustCredit(
+          $('creditCustomerSelect').value,
+          -1,
+          $('creditAmountInput').value,
+          $('creditNoteInput').value
+        );
+      });
+
+      $('openFrontendBtn')?.addEventListener('click', () => {
+        adminState.frontendUrl = ($('frontUrlInput')?.value || './index.html').trim() || './index.html';
+        openFrontendPortal($('creditCustomerSelect').value);
+      });
+
+      $('customersTableBody')?.addEventListener('click', (e) => {
+        const selBtn = e.target.closest('.js-select-customer');
+        if (selBtn) {
+          const cid = selBtn.dataset.cid;
+          if ($('creditCustomerSelect')) $('creditCustomerSelect').value = cid;
+          $('creditAmountInput')?.focus();
+          return;
+        }
+        const goBtn = e.target.closest('.js-go-frontend');
+        if (goBtn) {
+          adminState.frontendUrl = ($('frontUrlInput')?.value || './index.html').trim() || './index.html';
+          openFrontendPortal(goBtn.dataset.cid);
+        }
+      });
+
+      $('createOrderBtn')?.addEventListener('click', createOrderFromAdmin);
+
+      $('ordersTableBody')?.addEventListener('click', (e) => {
+        const accBtn = e.target.closest('.js-accept-order');
+        if (accBtn) {
+          acceptOrder(accBtn.dataset.oid);
+        }
+      });
+
       const previewRateBtn = document.getElementById('previewRateBtn');
       const rateBanner = document.getElementById('rateBanner');
       if (previewRateBtn && rateBanner) {
@@ -938,8 +1360,8 @@
           const fx = document.getElementById('rateFx').value;
           const kg = document.getElementById('rateKg').value;
           const cbm = document.getElementById('rateCbm').value;
-          const air = document.getElementById('rateAir').value;
-          rateBanner.textContent = `ตัวอย่างค่าที่กรอก (ยังไม่บันทึกลงระบบ): เรท ${fx} บาท/หยวน, รถ ${kg} บาท/กก., รถ ${cbm} บาท/CBM, แอร์ ${air} บาท/กก.`;
+          const sea = document.getElementById('rateSea').value;
+          rateBanner.textContent = `ตัวอย่างค่าที่กรอก (ยังไม่บันทึกลงระบบ): เรท ${fx} บาท/หยวน, รถ ${kg} บาท/กก., รถ ${cbm} บาท/CBM, เรือ ${sea} บาท/CBM`;
           rateBanner.classList.add('show');
         });
       }
@@ -954,6 +1376,8 @@
           setBanner.classList.add('show');
         });
       }
+
+      renderAll();
     })();
   </script>
 </body>
