@@ -1,1 +1,960 @@
-<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>SOMBOON EXPRESS Shop</title><style>body{font-family:sans-serif;background:#f1f5f9;margin:0;padding:20px;color:#0f172a}.wrap{max-width:1050px;margin:0 auto}.top{background:#0f172a;color:#fff;padding:16px 20px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.bal{background:#059669;padding:8px 14px;border-radius:8px;font-weight:bold}.grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}.card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.05)}.row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}input{padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px}input[type=text]{flex:1;min-width:200px}input[type=number]{width:100px}button{padding:8px 14px;border:none;border-radius:6px;font-weight:bold;cursor:pointer;background:#2563eb;color:#fff}button.g{background:#059669}button.a{background:#d97706}table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #e2e8f0;padding:8px;text-align:left}th{background:#f8fafc}</style></head><body><div class="wrap"><div class="top"><div>SOMBOON EXPRESS - Shop</div><div class="bal">Balance: <span id="b">0.00</span> THB</div></div><div class="grid"><div class="card"><h3>Fetch Order Item</h3><div class="row"><input id="u" type="text" placeholder="1688 / Taobao / Tmall URL"><input id="r" type="number" step="0.01" value="5.30"><button id="fBtn" type="button">Fetch</button></div><div id="meta" style="margin-bottom:8px;font-weight:bold"></div><table><thead><tr><th>Spec</th><th>CNY</th><th>THB/pc</th><th>Qty</th><th>Total</th></tr></thead><tbody id="tb"><tr><td colspan="5">No data</td></tr></tbody></table><div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><div>Total: <strong id="tot">0.00</strong> THB</div><div><button id="payBtn" class="a" type="button">Deduct Balance</button> <button id="cpBtn" class="g" type="button">Copy</button></div></div></div><div class="card"><h3>Topup</h3><div class="row"><input id="amt" type="number" step="0.01" placeholder="THB"><input id="note" type="text" placeholder="Note"><button id="topBtn" class="g" type="button">Add</button></div><div id="logs"></div></div></div></div><script>const K='sb_shop_v3';let st=JSON.parse(localStorage.getItem(K)||'null')||{bal:0,logs:[]};let cur={title:'',shop:'',url:''};let list=[];function save(){localStorage.setItem(K,JSON.stringify(st));drawW();}function drawW(){b.textContent=Number(st.bal||0).toFixed(2);logs.innerHTML=st.logs.map(x=>'<div>'+(x.d>0?'+':'-')+Number(x.a).toFixed(2)+' THB - '+x.n+' ('+x.t+')</div>').join('');}function drawL(){const rt=parseFloat(r.value)||5.3;if(!list.length){tb.innerHTML='<tr><td colspan="5">No data</td></tr>';tot.textContent='0.00';return;}let sum=0;tb.innerHTML=list.map((v,i)=>{const c=Number(v.priceYuan)||0;const u=c*rt;const q=Number(v.qty)||0;const s=u*q;sum+=s;return '<tr><td>'+v.spec+'</td><td>'+c.toFixed(2)+'</td><td>'+u.toFixed(2)+'</td><td><input type="number" min="0" value="'+q+'" onchange="setQ('+i+',this.value)"></td><td>'+s.toFixed(2)+'</td></tr>';}).join('');tot.textContent=sum.toFixed(2);}window.setQ=(i,v)=>{list[i].qty=Math.max(0,parseInt(v,10)||0);drawL();};r.onchange=drawL;topBtn.onclick=()=>{const a=parseFloat(amt.value);if(!a||a<=0)return;st.bal=Number(st.bal||0)+a;st.logs.unshift({d:1,a,n:note.value||'Topup',t:new Date().toLocaleTimeString()});amt.value='';note.value='';save();};payBtn.onclick=()=>{const cost=parseFloat(tot.textContent)||0;if(cost<=0||Number(st.bal||0)<cost)return alert('Check balance/total');st.bal=Number(st.bal||0)-cost;st.logs.unshift({d:-1,a:cost,n:'Order: '+(cur.title||'Item'),t:new Date().toLocaleTimeString()});save();alert('Deducted');};fBtn.onclick=async()=>{const url=u.value.trim();if(!url)return;fBtn.disabled=true;try{const res=await fetch('http://localhost:3002/api/product?url='+encodeURIComponent(url));const d=await res.json();if(!d.ok||!d.product)throw 0;cur={...d.product,url};meta.textContent=(cur.title||'')+' | '+(cur.shop||'');list=(cur.variants||[]).map(v=>({...v,qty:0}));drawL();}catch{alert('Server 3002 not running?');}finally{fBtn.disabled=false;}};cpBtn.onclick=async()=>{const p=list.filter(v=>(Number(v.qty)||0)>0);if(!p.length)return alert('Set qty');const rt=parseFloat(r.value)||5.3;const txt=[cur.title,...p.map(v=>v.spec+' x'+v.qty+' = '+((Number(v.priceYuan)||0)*rt*(Number(v.qty)||0)).toFixed(2)),'TOTAL: '+tot.textContent+' THB',cur.url].filter(Boolean).join('\n');try{await navigator.clipboard.writeText(txt);alert('Copied');}catch{prompt('',txt);}};drawW();drawL();</script></body></html>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SOMBOON EXPRESS — ระบบหลังบ้าน (Admin Dashboard)</title>
+  <style>
+    :root {
+      --bg-app: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-sidebar: #0f172a;
+      --bg-sidebar-hover: #1e293b;
+      --bg-sidebar-active: #2563eb;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sidebar: #cbd5e1;
+      --border-color: #e2e8f0;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --success: #059669;
+      --success-soft: #ecfdf5;
+      --warning: #d97706;
+      --warning-soft: #fffbeb;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --sidebar-w: 250px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, "Noto Sans Thai", sans-serif;
+      background: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar ด้านซ้าย */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      color: var(--text-sidebar);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 30;
+      transition: transform 0.22s ease;
+    }
+
+    .brand {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-title {
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .nav-list {
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--text-sidebar);
+      font-size: 14px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .nav-btn:hover {
+      background: var(--bg-sidebar-hover);
+      color: #ffffff;
+    }
+
+    .nav-btn.active {
+      background: var(--bg-sidebar-active);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .sidebar-foot {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      z-index: 20;
+    }
+
+    /* ส่วนเนื้อหาหลัก */
+    .main-wrap {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 15;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-toggle {
+      display: none;
+      border: 1px solid var(--border-color);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .page-heading {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .pill.warn {
+      background: var(--warning-soft);
+      color: var(--warning);
+    }
+
+    .content {
+      padding: 20px;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .section-desc {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* การ์ดและกริด */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .kpi-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .kpi-val {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .kpi-note {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 4px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* ตาราง */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 12.5px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .b-ok { background: var(--success-soft); color: var(--success); }
+    .b-wait { background: var(--warning-soft); color: var(--warning); }
+    .b-info { background: var(--accent-soft); color: var(--accent); }
+    .b-err { background: var(--danger-soft); color: var(--danger); }
+
+    /* ฟอร์มและปุ่ม (โหมดตัวอย่าง UI เท่านั้น) */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .field input,
+    .field select {
+      padding: 9px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text-main);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      font-size: 13.5px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: #fff; color: var(--text-main); border-color: #cbd5e1; }
+
+    .demo-banner {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    .demo-banner.show {
+      display: block;
+    }
+
+    /* รองรับแท็บเล็ตและมือถือ */
+    @media (max-width: 960px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: inline-flex;
+      }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .backdrop.open {
+        display: block;
+      }
+      .main-wrap {
+        margin-left: 0;
+      }
+      .content {
+        padding: 14px;
+      }
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop" id="backdrop"></div>
+
+  <div class="layout">
+    <!-- 1. Sidebar เมนูด้านซ้าย -->
+    <aside class="sidebar" id="sidebar" aria-label="เมนูหลักผู้ดูแลระบบ">
+      <div class="brand">
+        <div class="brand-title">SOMBOON EXPRESS</div>
+        <div class="brand-sub">ระบบหลังบ้านผู้ดูแล (ขั้นที่ 1 • UI)</div>
+      </div>
+
+      <nav class="nav-list" id="navList">
+        <button class="nav-btn active" type="button" data-page="dashboard"><span class="nav-dot"></span>Dashboard</button>
+        <button class="nav-btn" type="button" data-page="orders"><span class="nav-dot"></span>Orders</button>
+        <button class="nav-btn" type="button" data-page="customers"><span class="nav-dot"></span>Customers</button>
+        <button class="nav-btn" type="button" data-page="products"><span class="nav-dot"></span>Products</button>
+        <button class="nav-btn" type="button" data-page="parcels"><span class="nav-dot"></span>Parcels</button>
+        <button class="nav-btn" type="button" data-page="payments"><span class="nav-dot"></span>Payments</button>
+        <button class="nav-btn" type="button" data-page="rates"><span class="nav-dot"></span>Shipping Rates</button>
+        <button class="nav-btn" type="button" data-page="settings"><span class="nav-dot"></span>Settings</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        โหมดต้นแบบโครงหน้าจอ (ข้อมูลตัวอย่าง)<br />
+        ยังไม่เชื่อม API หรือฐานข้อมูล
+      </div>
+    </aside>
+
+    <!-- พื้นที่เนื้อหาหลัก -->
+    <div class="main-wrap">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" type="button">☰ เมนู</button>
+          <h1 class="page-heading" id="topTitle">Dashboard</h1>
+        </div>
+        <div class="topbar-right">
+          <span class="pill">ผู้ดูแลระบบ: Admin</span>
+          <span class="pill warn">ขั้นที่ 1 • โครงสร้าง UI</span>
+        </div>
+      </header>
+
+      <main class="content">
+        <!-- 2. Dashboard -->
+        <section class="section active" id="page-dashboard">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">ภาพรวมระบบหลังบ้าน (Dashboard)</h2>
+              <p class="section-desc">สรุปสถานะคำสั่งซื้อ ลูกค้า พัสดุ และการเงินเบื้องต้น (ข้อมูลตัวอย่างสำหรับตรวจสอบหน้าจอ)</p>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <div class="card">
+              <div class="kpi-label">คำสั่งซื้อวันนี้ (Orders)</div>
+              <div class="kpi-val">24 รายการ</div>
+              <div class="kpi-note">+12% จากเมื่อวาน (ตัวอย่าง)</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">ลูกค้าที่ใช้งานอยู่ (Customers)</div>
+              <div class="kpi-val">148 ราย</div>
+              <div class="kpi-note">ลูกค้ารายใหม่ +6 รายสัปดาห์นี้</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">พัสดุระหว่างขนส่ง (Parcels)</div>
+              <div class="kpi-val">39 กล่อง</div>
+              <div class="kpi-note">ถึงโกดังปลายทางแล้ว 11 กล่อง</div>
+            </div>
+            <div class="card">
+              <div class="kpi-label">ยอดรับชำระวันนี้ (Payments)</div>
+              <div class="kpi-val">฿84,500</div>
+              <div class="kpi-note">รอตรวจสอบสลิป 3 รายการ</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="card">
+              <h3 class="card-title">รายการคำสั่งซื้อล่าสุด (ตัวอย่าง)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>เลขที่ใบสั่งซื้อ</th>
+                      <th>ลูกค้า</th>
+                      <th>ยอดรวม</th>
+                      <th>สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>SB-20261120-01</td>
+                      <td>คุณกิตติพงษ์</td>
+                      <td>฿12,450</td>
+                      <td><span class="badge b-ok">ชำระแล้ว</span></td>
+                    </tr>
+                    <tr>
+                      <td>SB-20261120-02</td>
+                      <td>ร้านปิ่นเกล้า มิวสิค</td>
+                      <td>฿6,820</td>
+                      <td><span class="badge b-wait">รอตรวจสอบยอด</span></td>
+                    </tr>
+                    <tr>
+                      <td>SB-20261120-03</td>
+                      <td>คุณอรอนงค์</td>
+                      <td>฿3,190</td>
+                      <td><span class="badge b-info">กำลังสั่งซื้อจากจีน</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="card-title">เรทขนส่งปัจจุบัน (ตัวอย่าง)</h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ประเภทขนส่ง</th>
+                      <th>เรทตัวอย่าง</th>
+                      <th>สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>เรทแลกเปลี่ยน CNY → THB</td>
+                      <td>5.35 บาท / หยวน</td>
+                      <td><span class="badge b-ok">ใช้งาน</span></td>
+                    </tr>
+                    <tr>
+                      <td>ขนส่งทางรถ (ต่อ กก.)</td>
+                      <td>45 บาท / กก.</td>
+                      <td><span class="badge b-ok">ใช้งาน</span></td>
+                    </tr>
+                    <tr>
+                      <td>ขนส่งทางรถ (ต่อ CBM)</td>
+                      <td>5,900 บาท / CBM</td>
+                      <td><span class="badge b-ok">ใช้งาน</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Orders -->
+        <section class="section" id="page-orders">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">จัดการคำสั่งซื้อ (Orders)</h2>
+              <p class="section-desc">โครงสร้างตารางติดตามสถานะคำสั่งซื้อของลูกค้า (ข้อมูลตัวอย่าง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">รายการคำสั่งซื้อทั้งหมด</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสออเดอร์</th>
+                    <th>ลูกค้า</th>
+                    <th>จำนวนรายการ</th>
+                    <th>ยอดรวม (THB)</th>
+                    <th>สถานะออเดอร์</th>
+                    <th>วันที่สร้าง</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ORD-1041</td>
+                    <td>คุณกิตติพงษ์</td>
+                    <td>4 สเปค</td>
+                    <td>12,450.00</td>
+                    <td><span class="badge b-ok">ดำเนินการแล้ว</span></td>
+                    <td>20/11/2026</td>
+                  </tr>
+                  <tr>
+                    <td>ORD-1042</td>
+                    <td>ร้านปิ่นเกล้า มิวสิค</td>
+                    <td>2 สเปค</td>
+                    <td>6,820.00</td>
+                    <td><span class="badge b-wait">รอยืนยัน</span></td>
+                    <td>20/11/2026</td>
+                  </tr>
+                  <tr>
+                    <td>ORD-1043</td>
+                    <td>คุณอรอนงค์</td>
+                    <td>1 สเปค</td>
+                    <td>3,190.00</td>
+                    <td><span class="badge b-info">กำลังจัดหาสินค้า</span></td>
+                    <td>19/11/2026</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. Customers -->
+        <section class="section" id="page-customers">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">รายชื่อลูกค้า (Customers)</h2>
+              <p class="section-desc">โครงสร้างข้อมูลลูกค้าและยอดเครดิตคงเหลือ (ข้อมูลตัวอย่าง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">บัญชีลูกค้าในระบบ</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสลูกค้า</th>
+                    <th>ชื่อลูกค้า / ร้านค้า</th>
+                    <th>ช่องทางติดต่อ</th>
+                    <th>เครดิตคงเหลือ</th>
+                    <th>สถานะบัญชี</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>CUS-001</td>
+                    <td>คุณกิตติพงษ์</td>
+                    <td>08x-xxx-1122</td>
+                    <td>฿18,500.00</td>
+                    <td><span class="badge b-ok">ปกติ</span></td>
+                  </tr>
+                  <tr>
+                    <td>CUS-002</td>
+                    <td>ร้านปิ่นเกล้า มิวสิค</td>
+                    <td>Line: @pingklao</td>
+                    <td>฿4,200.00</td>
+                    <td><span class="badge b-ok">ปกติ</span></td>
+                  </tr>
+                  <tr>
+                    <td>CUS-003</td>
+                    <td>คุณอรอนงค์</td>
+                    <td>09x-xxx-8899</td>
+                    <td>฿0.00</td>
+                    <td><span class="badge b-wait">รอเติมเครดิต</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Products -->
+        <section class="section" id="page-products">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">รายการสินค้า (Products)</h2>
+              <p class="section-desc">โครงสร้างแสดงรายการสินค้าที่ดึงหรือบันทึกไว้ (ข้อมูลตัวอย่าง ยังไม่เชื่อม API ดึงข้อมูลจริง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">แคตตาล็อกสินค้าตัวอย่าง</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสสินค้า</th>
+                    <th>ชื่อสินค้า</th>
+                    <th>แหล่งที่มา</th>
+                    <th>ราคาต้นทุน (CNY)</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>PRD-8801</td>
+                    <td>ปิ๊กกีตาร์ทรงหยดน้ำ คละความหนา (ชุดตัวอย่าง)</td>
+                    <td>1688</td>
+                    <td>12.50 ¥</td>
+                    <td><span class="badge b-ok">พร้อมอ้างอิง</span></td>
+                  </tr>
+                  <tr>
+                    <td>PRD-8802</td>
+                    <td>สายกีตาร์โปร่งเคลือบกันสนิม (ชุดตัวอย่าง)</td>
+                    <td>Taobao</td>
+                    <td>18.00 ¥</td>
+                    <td><span class="badge b-info">ตรวจสอบสเปค</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. Parcels -->
+        <section class="section" id="page-parcels">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">ติดตามพัสดุ (Parcels)</h2>
+              <p class="section-desc">โครงสร้างติดตามเลขพัสดุจีน-ไทย น้ำหนัก และขนาดกล่อง (ข้อมูลตัวอย่าง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">สถานะพัสดุในตู้/รอบขนส่ง</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>เลขพัสดุ</th>
+                    <th>ลูกค้า</th>
+                    <th>น้ำหนัก / ขนาด</th>
+                    <th>จุดหมาย</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>YT8849201122CN</td>
+                    <td>คุณกิตติพงษ์</td>
+                    <td>3.40 กก. / 0.04 CBM</td>
+                    <td>กรุงเทพฯ (หลักสี่)</td>
+                    <td><span class="badge b-ok">ถึงไทยแล้ว</span></td>
+                  </tr>
+                  <tr>
+                    <td>SF9910293847CN</td>
+                    <td>ร้านปิ่นเกล้า มิวสิค</td>
+                    <td>6.15 กก. / 0.08 CBM</td>
+                    <td>กรุงเทพฯ (ปิ่นเกล้า)</td>
+                    <td><span class="badge b-info">อยู่ระหว่างขนส่ง</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. Payments -->
+        <section class="section" id="page-payments">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">การเงินและการชำระเงิน (Payments)</h2>
+              <p class="section-desc">โครงสร้างรายการเติมเงิน หักยอด และตรวจสอบการชำระเงิน (ข้อมูลตัวอย่าง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">ประวัติธุรกรรมทางการเงิน (ตัวอย่าง)</h3>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสรายการ</th>
+                    <th>ลูกค้า</th>
+                    <th>ประเภทรายการ</th>
+                    <th>จำนวนเงิน</th>
+                    <th>สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>PAY-5001</td>
+                    <td>คุณกิตติพงษ์</td>
+                    <td>เติมเงินเข้าระบบ</td>
+                    <td>+฿20,000.00</td>
+                    <td><span class="badge b-ok">ยืนยันแล้ว</span></td>
+                  </tr>
+                  <tr>
+                    <td>PAY-5002</td>
+                    <td>ร้านปิ่นเกล้า มิวสิค</td>
+                    <td>ชำระค่าสั่งซื้อ</td>
+                    <td>-฿6,820.00</td>
+                    <td><span class="badge b-wait">รอตรวจสลิป</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. Shipping Rates -->
+        <section class="section" id="page-rates">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">อัตราค่าขนส่งและเรท (Shipping Rates)</h2>
+              <p class="section-desc">โครงสร้างฟอร์มกำหนดเรทค่าขนส่งและอัตราแลกเปลี่ยน (ขั้นที่ 1 แสดงผลตัวอย่างเท่านั้น)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">ตั้งค่าอัตราค่าขนส่ง (ตัวอย่างหน้าจอ)</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="rateFx">อัตราแลกเปลี่ยน (บาท ต่อ 1 หยวน)</label>
+                <input id="rateFx" type="number" step="0.01" value="5.35" />
+              </div>
+              <div class="field">
+                <label for="rateKg">ค่าขนส่งทางรถต่อกิโลกรัม (บาท/กก.)</label>
+                <input id="rateKg" type="number" step="1" value="45" />
+              </div>
+              <div class="field">
+                <label for="rateCbm">ค่าขนส่งทางรถต่อคิวบิกเมตร (บาท/CBM)</label>
+                <input id="rateCbm" type="number" step="50" value="5900" />
+              </div>
+              <div class="field">
+                <label for="rateAir">ค่าขนส่งทางอากาศต่อกิโลกรัม (บาท/กก.)</label>
+                <input id="rateAir" type="number" step="10" value="320" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button" id="previewRateBtn">แสดงตัวอย่างค่าที่กรอก (ยังไม่บันทึกจริง)</button>
+            </div>
+            <div class="demo-banner" id="rateBanner"></div>
+          </div>
+        </section>
+
+        <!-- 9. Settings -->
+        <section class="section" id="page-settings">
+          <div class="section-head">
+            <div>
+              <h2 class="section-title">ตั้งค่าระบบ (Settings)</h2>
+              <p class="section-desc">โครงสร้างการตั้งค่าพื้นฐานของระบบหลังบ้าน SOMBOON EXPRESS (ขั้นที่ 1 ยังไม่เชื่อมระบบจริง)</p>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">ข้อมูลระบบพื้นฐาน (ตัวอย่าง)</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="setBrand">ชื่อระบบ / แบรนด์</label>
+                <input id="setBrand" type="text" value="SOMBOON EXPRESS" />
+              </div>
+              <div class="field">
+                <label for="setMode">สถานะการทำงานของหน้านี้</label>
+                <select id="setMode">
+                  <option value="ui-stage-1" selected>ขั้นที่ 1: โครงสร้างหน้าจอและหน้าตา UI</option>
+                  <option value="pending-api">รอเชื่อมต่อระบบหลังบ้านในขั้นถัดไป</option>
+                </select>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-ghost" type="button" id="previewSetBtn">ดูสรุปค่าในฟอร์ม (โหมดตัวอย่าง)</button>
+            </div>
+            <div class="demo-banner" id="setBanner"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const pageMeta = {
+        dashboard: 'Dashboard',
+        orders: 'Orders — จัดการคำสั่งซื้อ',
+        customers: 'Customers — รายชื่อลูกค้า',
+        products: 'Products — รายการสินค้า',
+        parcels: 'Parcels — ติดตามพัสดุ',
+        payments: 'Payments — การเงินและการชำระเงิน',
+        rates: 'Shipping Rates — อัตราค่าขนส่งและเรท',
+        settings: 'Settings — ตั้งค่าระบบ'
+      };
+
+      const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
+      const sections = Array.from(document.querySelectorAll('.section'));
+      const topTitle = document.getElementById('topTitle');
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('backdrop');
+      const menuToggle = document.getElementById('menuToggle');
+
+      function openDrawer() {
+        sidebar.classList.add('open');
+        backdrop.classList.add('open');
+      }
+
+      function closeDrawer() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('open');
+      }
+
+      function switchPage(pageKey) {
+        if (!pageMeta[pageKey]) return;
+
+        navButtons.forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.page === pageKey);
+        });
+
+        sections.forEach((sec) => {
+          sec.classList.toggle('active', sec.id === 'page-' + pageKey);
+        });
+
+        topTitle.textContent = pageMeta[pageKey];
+        closeDrawer();
+      }
+
+      navButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          switchPage(btn.dataset.page);
+        });
+      });
+
+      menuToggle.addEventListener('click', () => {
+        if (sidebar.classList.contains('open')) {
+          closeDrawer();
+        } else {
+          openDrawer();
+        }
+      });
+
+      backdrop.addEventListener('click', closeDrawer);
+
+      const previewRateBtn = document.getElementById('previewRateBtn');
+      const rateBanner = document.getElementById('rateBanner');
+      if (previewRateBtn && rateBanner) {
+        previewRateBtn.addEventListener('click', () => {
+          const fx = document.getElementById('rateFx').value;
+          const kg = document.getElementById('rateKg').value;
+          const cbm = document.getElementById('rateCbm').value;
+          const air = document.getElementById('rateAir').value;
+          rateBanner.textContent = `ตัวอย่างค่าที่กรอก (ยังไม่บันทึกลงระบบ): เรท ${fx} บาท/หยวน, รถ ${kg} บาท/กก., รถ ${cbm} บาท/CBM, แอร์ ${air} บาท/กก.`;
+          rateBanner.classList.add('show');
+        });
+      }
+
+      const previewSetBtn = document.getElementById('previewSetBtn');
+      const setBanner = document.getElementById('setBanner');
+      if (previewSetBtn && setBanner) {
+        previewSetBtn.addEventListener('click', () => {
+          const brand = document.getElementById('setBrand').value;
+          const mode = document.getElementById('setMode').value;
+          setBanner.textContent = `ตัวอย่างค่าในฟอร์ม (ยังไม่บันทึกลงระบบ): แบรนด์ "${brand}" | โหมด "${mode}"`;
+          setBanner.classList.add('show');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
