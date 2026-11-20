@@ -414,6 +414,49 @@
       margin-bottom: 12px;
     }
 
+    .slip-thumb {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .slip-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      z-index: 60;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .slip-modal.open {
+      display: flex;
+    }
+
+    .slip-modal-box {
+      background: var(--bg-surface);
+      border-radius: var(--radius);
+      max-width: 520px;
+      width: 100%;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .slip-modal-img {
+      max-width: 100%;
+      max-height: 65vh;
+      display: block;
+      margin: 10px auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
     /* รองรับแท็บเล็ตและมือถือ */
     @media (max-width: 960px) {
       .kpi-grid {
@@ -792,6 +835,34 @@
               <p class="section-desc">บันทึกประวัติการเพิ่ม/ลดเครดิต และการหักเครดิตเมื่อแอดมินรับออเดอร์</p>
             </div>
           </div>
+
+          <!-- ส่วนแสดงรายการคำขอเติมเงิน (แยกจากประวัติธุรกรรมเดิม) -->
+          <div class="card" style="margin-bottom:16px;" id="topupRequestsCard">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <h3 class="card-title" style="margin:0;">รายการคำขอเติมเงิน (รอตรวจสอบสลิปและอนุมัติ)</h3>
+              <button class="btn btn-ghost" type="button" id="refreshTopupRequestsBtn">รีเฟรชรายการคำขอเติมเงิน</button>
+            </div>
+            <div class="info-box" id="topupStorageStatus">โหมดหน่วยความจำหน้าเว็บปัจจุบัน (ยังไม่เชื่อม Backend หรือฐานข้อมูลจริง) — รายการรออนุมัติและปฏิเสธจะไม่เพิ่มเครดิต</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>รหัสคำขอเติมเงิน</th>
+                    <th>รหัสบัญชีลูกค้า</th>
+                    <th>ชื่อลูกค้า</th>
+                    <th>จำนวนเงินที่ต้องการเติม</th>
+                    <th>รูปสลิปการโอนเงิน</th>
+                    <th>วันที่และเวลาที่ส่งคำขอ</th>
+                    <th>สถานะคำขอ</th>
+                    <th>การจัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="topupRequestsBody"></tbody>
+              </table>
+            </div>
+            <div class="status-msg" id="topupStatusMsg"></div>
+          </div>
+
           <div class="card">
             <h3 class="card-title">ประวัติธุรกรรมเครดิตและคำสั่งซื้อ</h3>
             <div class="table-wrap">
@@ -880,6 +951,18 @@
     </div>
   </div>
 
+  <!-- Modal สำหรับเปิดดูรูปสลิปการโอนเงิน -->
+  <div class="slip-modal" id="slipModal" role="dialog" aria-modal="true" aria-labelledby="slipModalTitle">
+    <div class="slip-modal-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <h3 class="card-title" id="slipModalTitle" style="margin:0;">รูปสลิปการโอนเงิน</h3>
+        <button class="btn btn-ghost" type="button" id="closeSlipModalBtn" style="padding:4px 10px;">ปิด</button>
+      </div>
+      <div class="info-box" id="slipModalMeta" style="margin-top:10px;"></div>
+      <div id="slipModalBody"></div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const pageMeta = {
@@ -893,12 +976,6 @@
         settings: 'Settings — ตั้งค่าระบบ'
       };
 
-      /* =====================================================================
-         อ่านข้อมูลชื่อลูกค้าจาก localStorage คีย์ somboon_accounts เท่านั้น
-         - ห้ามแก้ไขข้อมูลใน localStorage
-         - ห้ามสร้างข้อมูลจำลองแทนข้อมูลจริง
-         - ถ้าไม่มีข้อมูล ให้แสดงข้อความว่าไม่พบข้อมูลลูกค้า
-      ===================================================================== */
       function readFrontendCustomersFromStorage() {
         const originText = window.location.origin && window.location.origin !== 'null'
           ? window.location.origin
@@ -980,7 +1057,7 @@
       }
 
       const AdminDataAdapter = {
-        mode: 'local-mock',
+        mode: 'local-memory-only',
         async getSnapshot(state) {
           return { ok: true, mode: this.mode, data: state };
         },
@@ -992,6 +1069,9 @@
         },
         async acceptOrderAndDeduct(order, payment) {
           return { ok: true, mode: this.mode, order, payment };
+        },
+        async reviewTopupRequest(payload) {
+          return { ok: true, mode: this.mode, payload };
         }
       };
 
@@ -1040,10 +1120,12 @@
         payments: [
           { id: 'PAY-5001', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: '-', type: 'เพิ่มเครดิต', amount: 20000, status: 'ยืนยันแล้ว' },
           { id: 'PAY-5002', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: 'ORD-1041', type: 'หักเครดิต (รับออเดอร์)', amount: -12450, status: 'หักแล้ว' }
-        ]
+        ],
+        topupRequests: []
       };
 
       const processingOrderIds = new Set();
+      const processingTopupIds = new Set();
       const $ = (id) => document.getElementById(id);
 
       function money(n) {
@@ -1058,6 +1140,12 @@
 
       function findCustomerById(customerId) {
         return adminState.customers.find((c) => c.id === customerId) || null;
+      }
+
+      function findCustomerByAccountKey(accountKey) {
+        const keyNorm = String(accountKey ?? '').trim();
+        if (!keyNorm) return null;
+        return adminState.customers.find((c) => String(c.key || '').trim() === keyNorm) || null;
       }
 
       function refreshCustomerStatus(customer) {
@@ -1092,11 +1180,11 @@
 
         if (!customer) {
           if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณาเลือกลูกค้าก่อน'; }
-          return;
+          return false;
         }
         if (!Number.isFinite(amount) || amount <= 0) {
           if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'กรุณากรอกจำนวนเครดิตที่มากกว่า 0 บาท'; }
-          return;
+          return false;
         }
 
         const currentCredit = Number(customer.credit) || 0;
@@ -1105,7 +1193,7 @@
             msgEl.style.color = '#dc2626';
             msgEl.textContent = `ลดเครดิตไม่ได้: ${customer.name} มีเครดิตคงเหลือ ฿${money(currentCredit)} (น้อยกว่า ฿${money(amount)})`;
           }
-          return;
+          return false;
         }
 
         const nextCredit = +(currentCredit + (deltaSign * amount)).toFixed(2);
@@ -1138,7 +1226,239 @@
           msgEl.textContent = `${deltaSign > 0 ? 'เพิ่ม' : 'ลด'}เครดิตให้ ${customer.name} จำนวน ฿${money(amount)} แล้ว (คงเหลือ ฿${money(customer.credit)})`;
         }
         renderAll();
+        return true;
       }
+
+      /* =====================================================================
+         ระบบรับและจัดการคำขอเติมเงิน (รออนุมัติ / อนุมัติ / ปฏิเสธ)
+         - ห้ามเพิ่มเครดิตเมื่อรับคำขอหรือเมื่อสถานะเป็น "รออนุมัติ" หรือ "ปฏิเสธ"
+         - อนุมัติแล้วห้ามอนุมัติซ้ำหรือเพิ่มเครดิตซ้ำ
+         - ผูกการเพิ่มเครดิตกับบัญชีลูกค้าที่เป็นเจ้าของคำขอจริงผ่าน adjustCredit
+      ===================================================================== */
+      function normalizeTopupRequest(payload) {
+        if (!payload || typeof payload !== 'object') return null;
+        const accountKey = String(payload.accountKey ?? payload.customerKey ?? payload.customerId ?? '').trim();
+        const matchedCustomer = findCustomerByAccountKey(accountKey) || findCustomerById(accountKey);
+        const customerId = String(matchedCustomer?.id || payload.customerId || '').trim();
+        const customerName = String(
+          payload.customerName || payload.name || matchedCustomer?.name || accountKey || '-'
+        ).trim();
+        const amount = Number(payload.amount);
+        if (!Number.isFinite(amount) || amount <= 0) return null;
+
+        const slipData = String(payload.slipImage || payload.slipUrl || payload.slip || '').trim();
+        const submittedAt = String(payload.submittedAt || payload.createdAt || '').trim()
+          || new Date().toLocaleString('th-TH');
+        const requestId = String(payload.id || payload.requestId || '').trim()
+          || ('TOPUP-' + Math.floor(10000 + Math.random() * 90000));
+
+        return {
+          id: requestId,
+          accountKey: accountKey || String(matchedCustomer?.key || '-'),
+          customerId,
+          customerName,
+          amount: +amount.toFixed(2),
+          slipImage: slipData,
+          submittedAt,
+          status: 'รออนุมัติ',
+          creditAdded: false,
+          reviewedAt: ''
+        };
+      }
+
+      function receiveTopupRequest(payload) {
+        const msgEl = $('topupStatusMsg');
+        const req = normalizeTopupRequest(payload);
+        if (!req) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = 'ข้อมูลคำขอเติมเงินไม่ครบหรือไม่ถูกต้อง (ต้องระบุจำนวนเงินที่มากกว่า 0 บาท)';
+          }
+          return null;
+        }
+        // ยืนยันว่าเมื่อได้รับคำขอ สถานะเริ่มต้นเป็น "รออนุมัติ" และเครดิตไม่ถูกเพิ่ม
+        req.status = 'รออนุมัติ';
+        req.creditAdded = false;
+        adminState.topupRequests.unshift(req);
+        if (msgEl) {
+          msgEl.style.color = '#d97706';
+          msgEl.textContent = `รับคำขอเติมเงิน ${req.id} ของ ${req.customerName} ยอด ฿${money(req.amount)} แล้ว (สถานะ: รออนุมัติ — เครดิตยังไม่ถูกเพิ่ม)`;
+        }
+        renderTopupRequestsSection();
+        return req;
+      }
+
+      function openSlipPreview(requestId) {
+        const req = adminState.topupRequests.find((r) => r.id === requestId);
+        const modal = $('slipModal');
+        const metaEl = $('slipModalMeta');
+        const bodyEl = $('slipModalBody');
+        if (!req || !modal || !metaEl || !bodyEl) return;
+
+        metaEl.textContent = `รหัสคำขอ: ${req.id} | บัญชี: ${req.accountKey} | ลูกค้า: ${req.customerName} | ยอดเติม: ฿${money(req.amount)} | สถานะ: ${req.status}`;
+
+        if (!req.slipImage) {
+          bodyEl.innerHTML = '<div class="info-box" style="text-align:center;">ไม่พบไฟล์รูปสลิปการโอนเงินในคำขอนี้</div>';
+        } else {
+          const safeSrc = esc(req.slipImage);
+          bodyEl.innerHTML = `<img class="slip-modal-img" src="${safeSrc}" alt="รูปสลิปคำขอ ${esc(req.id)}" />`;
+        }
+        modal.classList.add('open');
+      }
+
+      function closeSlipPreview() {
+        $('slipModal')?.classList.remove('open');
+      }
+
+      async function approveTopupRequest(requestId) {
+        const msgEl = $('topupStatusMsg');
+        if (!requestId || processingTopupIds.has(requestId)) return;
+
+        const req = adminState.topupRequests.find((r) => r.id === requestId);
+        if (!req) return;
+
+        if (req.status !== 'รออนุมัติ' || req.creditAdded === true) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `คำขอเติมเงิน ${req.id} ถูกจัดการแล้ว (สถานะ: ${req.status}) ไม่สามารถอนุมัติหรือเพิ่มเครดิตซ้ำได้`;
+          }
+          return;
+        }
+
+        const targetCustomer = findCustomerByAccountKey(req.accountKey) || findCustomerById(req.customerId);
+        if (!targetCustomer) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `ไม่พบบัญชีลูกค้าที่เป็นเจ้าของคำขอ ${req.id} (บัญชี: ${req.accountKey}) ในระบบหลังบ้าน`;
+          }
+          return;
+        }
+
+        processingTopupIds.add(requestId);
+        renderTopupRequestsSection();
+
+        try {
+          req.customerId = targetCustomer.id;
+          req.status = 'อนุมัติ';
+          req.creditAdded = true;
+          req.reviewedAt = new Date().toLocaleString('th-TH');
+
+          const applied = await adjustCredit(
+            targetCustomer.id,
+            1,
+            req.amount,
+            `อนุมัติคำขอเติมเงิน ${req.id} (${req.accountKey})`
+          );
+
+          if (!applied) {
+            req.status = 'รออนุมัติ';
+            req.creditAdded = false;
+            req.reviewedAt = '';
+            return;
+          }
+
+          await AdminDataAdapter.reviewTopupRequest({
+            requestId: req.id,
+            status: req.status,
+            customerId: targetCustomer.id,
+            amount: req.amount
+          });
+
+          if (msgEl) {
+            msgEl.style.color = '#059669';
+            msgEl.textContent = `อนุมัติคำขอเติมเงิน ${req.id} สำเร็จ — เพิ่มเครดิต ฿${money(req.amount)} ให้บัญชี ${targetCustomer.name} (${req.accountKey}) แล้ว`;
+          }
+        } finally {
+          processingTopupIds.delete(requestId);
+          renderAll();
+        }
+      }
+
+      async function rejectTopupRequest(requestId) {
+        const msgEl = $('topupStatusMsg');
+        if (!requestId || processingTopupIds.has(requestId)) return;
+
+        const req = adminState.topupRequests.find((r) => r.id === requestId);
+        if (!req) return;
+
+        if (req.status !== 'รออนุมัติ' || req.creditAdded === true) {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `คำขอเติมเงิน ${req.id} ถูกจัดการแล้ว (สถานะ: ${req.status}) ไม่สามารถเปลี่ยนสถานะซ้ำได้`;
+          }
+          return;
+        }
+
+        processingTopupIds.add(requestId);
+        renderTopupRequestsSection();
+
+        try {
+          // ปฏิเสธ: ห้ามเพิ่มเครดิต และห้ามเรียก adjustCredit
+          req.status = 'ปฏิเสธ';
+          req.creditAdded = false;
+          req.reviewedAt = new Date().toLocaleString('th-TH');
+
+          await AdminDataAdapter.reviewTopupRequest({
+            requestId: req.id,
+            status: req.status,
+            accountKey: req.accountKey,
+            amount: req.amount
+          });
+
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `ปฏิเสธคำขอเติมเงิน ${req.id} แล้ว — ไม่มีการเพิ่มเครดิตให้ ${req.customerName}`;
+          }
+        } finally {
+          processingTopupIds.delete(requestId);
+          renderTopupRequestsSection();
+        }
+      }
+
+      function renderTopupRequestsSection() {
+        const bodyEl = $('topupRequestsBody');
+        if (!bodyEl) return;
+
+        if (!adminState.topupRequests.length) {
+          bodyEl.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:18px;">ยังไม่มีรายการคำขอเติมเงิน</td></tr>';
+          return;
+        }
+
+        bodyEl.innerHTML = adminState.topupRequests.map((req) => {
+          let badgeClass = 'b-wait';
+          if (req.status === 'อนุมัติ') badgeClass = 'b-ok';
+          else if (req.status === 'ปฏิเสธ') badgeClass = 'b-err';
+
+          const isPending = req.status === 'รออนุมัติ' && req.creditAdded !== true;
+          const isBusy = processingTopupIds.has(req.id);
+
+          const slipCell = req.slipImage
+            ? `<img class="slip-thumb" src="${esc(req.slipImage)}" alt="สลิป ${esc(req.id)}" />`
+              + `<button type="button" class="btn btn-ghost js-view-slip" data-rid="${esc(req.id)}" style="padding:4px 9px;font-size:12px;">ดูสลิป</button>`
+            : `<button type="button" class="btn btn-ghost js-view-slip" data-rid="${esc(req.id)}" style="padding:4px 9px;font-size:12px;">ไม่มีรูปสลิป</button>`;
+
+          const actionCell = isPending
+            ? `<button type="button" class="btn btn-success js-approve-topup" data-rid="${esc(req.id)}" ${isBusy ? 'disabled' : ''} style="padding:5px 10px;font-size:12px;">${isBusy ? 'กำลังอนุมัติ...' : 'อนุมัติ'}</button>`
+              + ` <button type="button" class="btn btn-danger-soft js-reject-topup" data-rid="${esc(req.id)}" ${isBusy ? 'disabled' : ''} style="padding:5px 10px;font-size:12px;">ปฏิเสธ</button>`
+            : `<span class="badge b-info">จัดการแล้ว (${esc(req.status)})</span>`;
+
+          return `<tr>
+            <td><strong>${esc(req.id)}</strong></td>
+            <td>${esc(req.accountKey)}</td>
+            <td>${esc(req.customerName)}</td>
+            <td><strong>฿${money(req.amount)}</strong></td>
+            <td>${slipCell}</td>
+            <td>${esc(req.submittedAt)}</td>
+            <td><span class="badge ${badgeClass}">${esc(req.status)}</span></td>
+            <td>${actionCell}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      window.SomboonTopupBridge = {
+        submitTopupRequest: receiveTopupRequest,
+        getTopupRequests: () => adminState.topupRequests.map((r) => ({ ...r }))
+      };
 
       async function createOrderFromAdmin() {
         const msgEl = $('orderStatusMsg');
@@ -1263,6 +1583,7 @@
       function renderAll() {
         renderFrontendCustomersSection();
         renderCustomerSelects();
+        renderTopupRequestsSection();
 
         const totalCredit = adminState.customers.reduce((sum, c) => sum + (Number(c.credit) || 0), 0);
         const pendingOrders = adminState.orders.filter((o) => o.status === 'รอรับออเดอร์');
@@ -1392,6 +1713,9 @@
         if (pageKey === 'customers') {
           renderFrontendCustomersSection();
         }
+        if (pageKey === 'payments') {
+          renderTopupRequestsSection();
+        }
         closeDrawer();
       }
 
@@ -1413,6 +1737,32 @@
 
       $('refreshFrontendCustomersBtn')?.addEventListener('click', () => {
         renderFrontendCustomersSection();
+      });
+
+      $('refreshTopupRequestsBtn')?.addEventListener('click', () => {
+        renderTopupRequestsSection();
+      });
+
+      $('topupRequestsBody')?.addEventListener('click', (e) => {
+        const viewBtn = e.target.closest('.js-view-slip');
+        if (viewBtn) {
+          openSlipPreview(viewBtn.dataset.rid);
+          return;
+        }
+        const approveBtn = e.target.closest('.js-approve-topup');
+        if (approveBtn) {
+          approveTopupRequest(approveBtn.dataset.rid);
+          return;
+        }
+        const rejectBtn = e.target.closest('.js-reject-topup');
+        if (rejectBtn) {
+          rejectTopupRequest(rejectBtn.dataset.rid);
+        }
+      });
+
+      $('closeSlipModalBtn')?.addEventListener('click', closeSlipPreview);
+      $('slipModal')?.addEventListener('click', (e) => {
+        if (e.target === $('slipModal')) closeSlipPreview();
       });
 
       window.addEventListener('storage', (e) => {
