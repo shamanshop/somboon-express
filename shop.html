@@ -404,6 +404,16 @@
       min-height: 18px;
     }
 
+    .info-box {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
     /* รองรับแท็บเล็ตและมือถือ */
     @media (max-width: 960px) {
       .kpi-grid {
@@ -611,12 +621,36 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">รายชื่อลูกค้าและเครดิต (Customers)</h2>
-              <p class="section-desc">เพิ่ม/ลดเครดิตของลูกค้า และเตรียมช่องทางเชื่อมไปยังระบบหน้าบ้าน</p>
+              <p class="section-desc">อ่านชื่อลูกค้าจากระบบหน้าบ้าน (localStorage คีย์ somboon_accounts) โดยไม่แก้ไขข้อมูลใน localStorage</p>
             </div>
           </div>
 
           <div class="card" style="margin-bottom:16px;">
-            <h3 class="card-title">ปรับเครดิตลูกค้า (เพิ่ม / ลด)</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+              <h3 class="card-title" style="margin:0;">ข้อมูลลูกค้าจากระบบหน้าบ้าน (somboon_accounts)</h3>
+              <button class="btn btn-ghost" type="button" id="refreshFrontendCustomersBtn">รีเฟรชข้อมูลจากหน้าบ้าน</button>
+            </div>
+            <div class="info-box" id="frontendOriginStatus">กำลังตรวจสอบ Origin และข้อมูลจาก localStorage (somboon_accounts)...</div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Account Key</th>
+                    <th>ชื่อลูกค้า (profile.name)</th>
+                    <th>ข้อมูลติดต่อ (profile.contact)</th>
+                    <th>แหล่งข้อมูล</th>
+                  </tr>
+                </thead>
+                <tbody id="frontendCustomersBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <h3 class="card-title" style="margin:0;">ปรับเครดิตลูกค้า (เพิ่ม / ลด)</h3>
+              <span class="badge b-wait">ข้อมูลตัวอย่างหลังบ้าน</span>
+            </div>
             <div class="form-grid">
               <div class="field">
                 <label for="creditCustomerSelect">เลือกลูกค้า</label>
@@ -644,7 +678,10 @@
           </div>
 
           <div class="card">
-            <h3 class="card-title">บัญชีลูกค้าในระบบ</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <h3 class="card-title" style="margin:0;">บัญชีลูกค้าในระบบ (ข้อมูลตัวอย่างหลังบ้าน)</h3>
+              <span class="badge b-wait">ข้อมูลตัวอย่าง</span>
+            </div>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -857,11 +894,97 @@
       };
 
       /* =====================================================================
+         อ่านข้อมูลชื่อลูกค้าจาก localStorage คีย์ somboon_accounts เท่านั้น
+         - ห้ามแก้ไขข้อมูลใน localStorage
+         - ห้ามสร้างข้อมูลจำลองแทนข้อมูลจริง
+         - ถ้าไม่มีข้อมูล ให้แสดงข้อความว่าไม่พบข้อมูลลูกค้า
+      ===================================================================== */
+      function readFrontendCustomersFromStorage() {
+        const originText = window.location.origin && window.location.origin !== 'null'
+          ? window.location.origin
+          : `file:// (${window.location.pathname || 'local'})`;
+
+        let rawAccounts = null;
+        try {
+          const rawStr = localStorage.getItem('somboon_accounts');
+          if (!rawStr) {
+            return {
+              originText,
+              customers: [],
+              note: `Origin ปัจจุบัน: ${originText} — ไม่พบคีย์ somboon_accounts ใน localStorage ของ origin นี้`
+            };
+          }
+          rawAccounts = JSON.parse(rawStr);
+        } catch (err) {
+          return {
+            originText,
+            customers: [],
+            note: `Origin ปัจจุบัน: ${originText} — อ่านข้อมูล somboon_accounts ไม่สำเร็จ`
+          };
+        }
+
+        if (!rawAccounts || typeof rawAccounts !== 'object' || Array.isArray(rawAccounts)) {
+          return {
+            originText,
+            customers: [],
+            note: `Origin ปัจจุบัน: ${originText} — ไม่พบข้อมูลลูกค้า`
+          };
+        }
+
+        const list = [];
+        Object.keys(rawAccounts).forEach((accountKey) => {
+          const acc = rawAccounts[accountKey];
+          const profileName = String(acc?.profile?.name ?? '').trim();
+          const profileContact = String(acc?.profile?.contact ?? '').trim();
+          if (profileName) {
+            list.push({
+              accountKey,
+              name: profileName,
+              contact: profileContact
+            });
+          }
+        });
+
+        return {
+          originText,
+          customers: list,
+          note: `Origin ปัจจุบัน: ${originText} — อ่านแบบอ่านอย่างเดียว (ไม่แก้ไข localStorage) พบ ${list.length} บัญชี`
+        };
+      }
+
+      function renderFrontendCustomersSection() {
+        const bodyEl = document.getElementById('frontendCustomersBody');
+        const infoEl = document.getElementById('frontendOriginStatus');
+        const result = readFrontendCustomersFromStorage();
+
+        if (infoEl) {
+          infoEl.textContent = result.note;
+        }
+
+        if (!bodyEl) return;
+
+        if (!result.customers.length) {
+          bodyEl.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:18px;">ไม่พบข้อมูลลูกค้า</td></tr>';
+          return;
+        }
+
+        bodyEl.innerHTML = result.customers.map((c) => {
+          const contactDisplay = c.contact ? esc(c.contact) : '<span style="color:#64748b;">-</span>';
+          return `<tr>
+            <td>${esc(c.accountKey)}</td>
+            <td><strong>${esc(c.name)}</strong></td>
+            <td>${contactDisplay}</td>
+            <td><span class="badge b-ok">ข้อมูลจริงจากหน้าบ้าน (somboon_accounts)</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+      /* =====================================================================
          1. API & DATABASE ADAPTER INTERFACE (เตรียมไว้สำหรับเชื่อมอนาคต)
          ตอนนี้ใช้ LocalMemory/Mock Adapter ยังไม่ยิง Backend หรือ DB จริง
       ===================================================================== */
       const AdminDataAdapter = {
-        mode: 'local-mock', // เปลี่ยนเป็น 'api-db' ได้ในอนาคตเมื่อพร้อมเชื่อมจริง
+        mode: 'local-mock',
         async getSnapshot(state) {
           return { ok: true, mode: this.mode, data: state };
         },
@@ -877,7 +1000,7 @@
       };
 
       /* =====================================================================
-         2. โครงสร้างข้อมูลกลาง (เชื่อม Customers <-> Credit <-> Orders <-> Payments)
+         2. โครงสร้างข้อมูลตัวอย่างหลังบ้าน (แยกจากข้อมูลจริงจากหน้าบ้านชัดเจน)
       ===================================================================== */
       const adminState = {
         frontendUrl: './index.html',
@@ -928,6 +1051,7 @@
       };
 
       const processingOrderIds = new Set();
+      const $ = (id) => document.getElementById(id);
 
       function money(n) {
         return Number(n || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1023,14 +1147,6 @@
         renderAll();
       }
 
-      /* =====================================================================
-         3. กติกาคำสั่งซื้อ & การรับออเดอร์ & หักเครดิต (ตามข้อกำหนด)
-         - ส่งออเดอร์แล้วยังไม่หักเครดิต
-         - ลูกค้าต้องมีเครดิตเพียงพอสำหรับยอดสั่งซื้อเต็มจำนวน
-         - หักเครดิตเฉพาะเมื่อผู้ดูแลกดรับออเดอร์เท่านั้น
-         - ป้องกันการหักเครดิตซ้ำ
-         - หากยังไม่รับออเดอร์ เครดิตต้องไม่เปลี่ยนแปลง
-      ===================================================================== */
       async function createOrderFromAdmin() {
         const msgEl = $('orderStatusMsg');
         const customerId = $('orderCustomerSelect')?.value;
@@ -1054,7 +1170,7 @@
           customerName: customer.name,
           detail,
           amount,
-          status: 'รอรับออเดอร์', // ส่งออเดอร์แล้วยังไม่หักเครดิต
+          status: 'รอรับออเดอร์',
           creditDeducted: false,
           refUrl,
           createdAt: new Date().toLocaleDateString('th-TH')
@@ -1081,7 +1197,6 @@
         const order = adminState.orders.find((o) => o.id === orderId);
         if (!order) return;
 
-        // ป้องกันการหักเครดิตซ้ำ
         if (order.creditDeducted === true || order.status !== 'รอรับออเดอร์') {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
@@ -1094,7 +1209,6 @@
         const orderAmount = Number(order.amount) || 0;
         const currentCredit = Number(customer?.credit) || 0;
 
-        // ลูกค้าต้องมีเครดิตเพียงพอสำหรับยอดสั่งซื้อเต็มจำนวน (ห้ามหักบางส่วน)
         if (!customer || currentCredit < orderAmount) {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
@@ -1135,9 +1249,6 @@
         }
       }
 
-      /* =====================================================================
-         4. การเรนเดอร์ข้อมูลเชื่อมโยงกันทุกตารางและการ์ด
-      ===================================================================== */
       function renderCustomerSelects() {
         const opts = adminState.customers
           .map((c) => `<option value="${esc(c.id)}">${esc(c.id)} — ${esc(c.name)} (เครดิต ฿${money(c.credit)})</option>`)
@@ -1157,6 +1268,7 @@
       }
 
       function renderAll() {
+        renderFrontendCustomersSection();
         renderCustomerSelects();
 
         const totalCredit = adminState.customers.reduce((sum, c) => sum + (Number(c.credit) || 0), 0);
@@ -1197,7 +1309,7 @@
             const bClass = Number(c.credit) > 0 ? 'b-ok' : 'b-wait';
             return `<tr>
               <td>${esc(c.id)}</td>
-              <td>${esc(c.name)}</td>
+              <td>${esc(c.name)} <span class="badge b-wait">ตัวอย่าง</span></td>
               <td>${esc(c.contact)}</td>
               <td><strong>฿${money(c.credit)}</strong></td>
               <td><span class="badge ${bClass}">${esc(c.status)}</span></td>
@@ -1255,9 +1367,6 @@
         }
       }
 
-      /* =====================================================================
-         5. การสลับเมนูและ Event Listener
-      ===================================================================== */
       const navButtons = Array.from(document.querySelectorAll('.nav-btn'));
       const sections = Array.from(document.querySelectorAll('.section'));
       const topTitle = document.getElementById('topTitle');
@@ -1287,6 +1396,9 @@
         });
 
         topTitle.textContent = pageMeta[pageKey];
+        if (pageKey === 'customers') {
+          renderFrontendCustomersSection();
+        }
         closeDrawer();
       }
 
@@ -1305,6 +1417,16 @@
       });
 
       backdrop.addEventListener('click', closeDrawer);
+
+      $('refreshFrontendCustomersBtn')?.addEventListener('click', () => {
+        renderFrontendCustomersSection();
+      });
+
+      window.addEventListener('storage', (e) => {
+        if (!e.key || e.key === 'somboon_accounts') {
+          renderFrontendCustomersSection();
+        }
+      });
 
       $('addCreditBtn')?.addEventListener('click', () => {
         adjustCredit(
