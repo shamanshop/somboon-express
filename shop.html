@@ -45,7 +45,6 @@
       min-height: 100vh;
     }
 
-    /* Sidebar ด้านซ้าย */
     .sidebar {
       width: var(--sidebar-w);
       background: var(--bg-sidebar);
@@ -139,7 +138,6 @@
       z-index: 20;
     }
 
-    /* ส่วนเนื้อหาหลัก */
     .main-wrap {
       flex: 1;
       margin-left: var(--sidebar-w);
@@ -245,7 +243,6 @@
       color: var(--text-muted);
     }
 
-    /* การ์ดและกริด */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -291,7 +288,6 @@
       font-weight: 700;
     }
 
-    /* ตาราง */
     .table-wrap {
       overflow-x: auto;
     }
@@ -329,7 +325,6 @@
     .b-info { background: var(--accent-soft); color: var(--accent); }
     .b-err { background: var(--danger-soft); color: var(--danger); }
 
-    /* ฟอร์มและปุ่ม */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -380,6 +375,7 @@
     .btn-success { background: var(--success); color: #fff; }
     .btn-danger-soft { background: var(--danger-soft); color: var(--danger); border-color: #fecaca; }
     .btn-ghost { background: #fff; color: var(--text-main); border-color: #cbd5e1; }
+    .btn.active-filter { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
     .demo-banner {
@@ -442,7 +438,7 @@
     .slip-modal-box {
       background: var(--bg-surface);
       border-radius: var(--radius);
-      max-width: 520px;
+      max-width: 560px;
       width: 100%;
       padding: 16px;
       box-shadow: var(--shadow);
@@ -457,7 +453,6 @@
       border: 1px solid var(--border-color);
     }
 
-    /* รองรับแท็บเล็ตและมือถือ */
     @media (max-width: 960px) {
       .kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -496,7 +491,6 @@
   <div class="backdrop" id="backdrop"></div>
 
   <div class="layout">
-    <!-- 1. Sidebar เมนูด้านซ้าย -->
     <aside class="sidebar" id="sidebar" aria-label="เมนูหลักผู้ดูแลระบบ">
       <div class="brand">
         <div class="brand-title">SOMBOON EXPRESS</div>
@@ -520,7 +514,6 @@
       </div>
     </aside>
 
-    <!-- พื้นที่เนื้อหาหลัก -->
     <div class="main-wrap">
       <header class="topbar">
         <div class="topbar-left">
@@ -534,7 +527,6 @@
       </header>
 
       <main class="content">
-        <!-- 2. Dashboard -->
         <section class="section active" id="page-dashboard">
           <div class="section-head">
             <div>
@@ -603,7 +595,6 @@
           </div>
         </section>
 
-        <!-- 3. Orders -->
         <section class="section" id="page-orders">
           <div class="section-head">
             <div>
@@ -659,7 +650,6 @@
           </div>
         </section>
 
-        <!-- 4. Customers -->
         <section class="section" id="page-customers">
           <div class="section-head">
             <div>
@@ -743,7 +733,6 @@
           </div>
         </section>
 
-        <!-- 5. Products -->
         <section class="section" id="page-products">
           <div class="section-head">
             <div>
@@ -785,7 +774,6 @@
           </div>
         </section>
 
-        <!-- 6. Parcels -->
         <section class="section" id="page-parcels">
           <div class="section-head">
             <div>
@@ -827,7 +815,6 @@
           </div>
         </section>
 
-        <!-- 7. Payments -->
         <section class="section" id="page-payments">
           <div class="section-head">
             <div>
@@ -836,24 +823,30 @@
             </div>
           </div>
 
-          <!-- ส่วนแสดงรายการคำขอเติมเงิน (แยกจากประวัติธุรกรรมเดิม) -->
           <div class="card" style="margin-bottom:16px;" id="topupRequestsCard">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
               <h3 class="card-title" style="margin:0;">รายการคำขอเติมเงิน (รอตรวจสอบสลิปและอนุมัติ)</h3>
-              <button class="btn btn-ghost" type="button" id="refreshTopupRequestsBtn">รีเฟรชรายการคำขอเติมเงิน</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;" id="topupFilterGroup">
+                <button class="btn btn-ghost active-filter js-topup-filter" type="button" data-filter="ทั้งหมด">ทั้งหมด</button>
+                <button class="btn btn-ghost js-topup-filter" type="button" data-filter="รออนุมัติ">รออนุมัติ</button>
+                <button class="btn btn-ghost js-topup-filter" type="button" data-filter="อนุมัติ">อนุมัติแล้ว</button>
+                <button class="btn btn-ghost js-topup-filter" type="button" data-filter="ปฏิเสธ">ปฏิเสธแล้ว</button>
+                <button class="btn btn-ghost" type="button" id="refreshTopupRequestsBtn">รีเฟรช</button>
+              </div>
             </div>
             <div class="info-box" id="topupStorageStatus">โหมดหน่วยความจำหน้าเว็บปัจจุบัน (ยังไม่เชื่อม Backend หรือฐานข้อมูลจริง) — รายการรออนุมัติและปฏิเสธจะไม่เพิ่มเครดิต</div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>รหัสคำขอเติมเงิน</th>
+                    <th>รหัสคำขอ</th>
                     <th>รหัสบัญชีลูกค้า</th>
                     <th>ชื่อลูกค้า</th>
-                    <th>จำนวนเงินที่ต้องการเติม</th>
-                    <th>รูปสลิปการโอนเงิน</th>
-                    <th>วันที่และเวลาที่ส่งคำขอ</th>
-                    <th>สถานะคำขอ</th>
+                    <th>จำนวนเงิน</th>
+                    <th>รูปสลิป</th>
+                    <th>วันและเวลาที่ส่ง</th>
+                    <th>สถานะ</th>
+                    <th>ผู้ทำรายการ / เวลา</th>
                     <th>การจัดการ</th>
                   </tr>
                 </thead>
@@ -883,7 +876,6 @@
           </div>
         </section>
 
-        <!-- 8. Shipping Rates -->
         <section class="section" id="page-rates">
           <div class="section-head">
             <div>
@@ -918,7 +910,6 @@
           </div>
         </section>
 
-        <!-- 9. Settings -->
         <section class="section" id="page-settings">
           <div class="section-head">
             <div>
@@ -951,11 +942,10 @@
     </div>
   </div>
 
-  <!-- Modal สำหรับเปิดดูรูปสลิปการโอนเงิน -->
   <div class="slip-modal" id="slipModal" role="dialog" aria-modal="true" aria-labelledby="slipModalTitle">
     <div class="slip-modal-box">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-        <h3 class="card-title" id="slipModalTitle" style="margin:0;">รูปสลิปการโอนเงิน</h3>
+        <h3 class="card-title" id="slipModalTitle" style="margin:0;">รูปสลิปการโอนเงิน (ขนาดใหญ่)</h3>
         <button class="btn btn-ghost" type="button" id="closeSlipModalBtn" style="padding:4px 10px;">ปิด</button>
       </div>
       <div class="info-box" id="slipModalMeta" style="margin-top:10px;"></div>
@@ -975,6 +965,23 @@
         rates: 'Shipping Rates — อัตราค่าขนส่งและเรท',
         settings: 'Settings — ตั้งค่าระบบ'
       };
+
+      const ALLOWED_SLIP_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      const MAX_SLIP_BYTES = 5 * 1024 * 1024; // 5 MB
+
+      function isSafeSlipSrc(src) {
+        const s = String(src || '').trim();
+        if (!s) return false;
+        if (s.startsWith('data:image/')) {
+          return /^data:image\/(jpeg|jpg|png|webp|gif);base64,[a-zA-Z0-9+/=]+$/i.test(s);
+        }
+        try {
+          const parsed = new URL(s, window.location.href);
+          return parsed.protocol === 'https:' || parsed.protocol === 'http:';
+        } catch {
+          return false;
+        }
+      }
 
       function readFrontendCustomersFromStorage() {
         const originText = window.location.origin && window.location.origin !== 'null'
@@ -1056,6 +1063,10 @@
         }).join('');
       }
 
+      /* =====================================================================
+         Backend / Storage Adapter Interface (โหมดหน่วยความจำหน้าเว็บปัจจุบัน
+         รอการเชื่อม Backend/Database/Storage จริงและตรวจสอบสิทธิ์ฝั่งเซิร์ฟเวอร์)
+      ===================================================================== */
       const AdminDataAdapter = {
         mode: 'local-memory-only',
         async getSnapshot(state) {
@@ -1077,6 +1088,7 @@
 
       const adminState = {
         frontendUrl: './index.html',
+        topupFilter: 'ทั้งหมด',
         customers: [
           { id: 'CUS-001', key: 'kittipong@somboon.local', name: 'คุณกิตติพงษ์', contact: '08x-xxx-1122', credit: 18500, status: 'ปกติ' },
           { id: 'CUS-002', key: 'pingklao@somboon.local', name: 'ร้านปิ่นเกล้า มิวสิค', contact: 'Line: @pingklao', credit: 4200, status: 'ปกติ' },
@@ -1230,10 +1242,10 @@
       }
 
       /* =====================================================================
-         ระบบรับและจัดการคำขอเติมเงิน (รออนุมัติ / อนุมัติ / ปฏิเสธ)
-         - ห้ามเพิ่มเครดิตเมื่อรับคำขอหรือเมื่อสถานะเป็น "รออนุมัติ" หรือ "ปฏิเสธ"
-         - อนุมัติแล้วห้ามอนุมัติซ้ำหรือเพิ่มเครดิตซ้ำ
-         - ผูกการเพิ่มเครดิตกับบัญชีลูกค้าที่เป็นเจ้าของคำขอจริงผ่าน adjustCredit
+         ระบบจัดการคำขอเติมเงินในเมนู Payments (รออนุมัติ / อนุมัติ / ปฏิเสธ)
+         - ไม่เพิ่มเครดิตเมื่อรับคำขอหรือเมื่อสถานะเป็น "รออนุมัติ" หรือ "ปฏิเสธ"
+         - อนุมัติแล้วล็อกไม่ให้อนุมัติซ้ำหรือเพิ่มเครดิตซ้ำ
+         - บันทึกประวัติผู้ทำรายการและเวลาทำรายการ
       ===================================================================== */
       function normalizeTopupRequest(payload) {
         if (!payload || typeof payload !== 'object') return null;
@@ -1244,13 +1256,23 @@
           payload.customerName || payload.name || matchedCustomer?.name || accountKey || '-'
         ).trim();
         const amount = Number(payload.amount);
-        if (!Number.isFinite(amount) || amount <= 0) return null;
+        if (!Number.isFinite(amount) || amount <= 0 || amount > 10000000) return null;
 
-        const slipData = String(payload.slipImage || payload.slipUrl || payload.slip || '').trim();
+        const rawSlip = String(payload.slipImage || payload.slipUrl || payload.slip || '').trim();
+        const slipMime = String(payload.slipMime || '').trim().toLowerCase();
+        const slipSize = Number(payload.slipSize || 0);
+        if (slipMime && !ALLOWED_SLIP_TYPES.includes(slipMime)) return null;
+        if (slipSize > 0 && slipSize > MAX_SLIP_BYTES) return null;
+        const slipImage = isSafeSlipSrc(rawSlip) ? rawSlip : '';
+
         const submittedAt = String(payload.submittedAt || payload.createdAt || '').trim()
           || new Date().toLocaleString('th-TH');
         const requestId = String(payload.id || payload.requestId || '').trim()
           || ('TOPUP-' + Math.floor(10000 + Math.random() * 90000));
+
+        if (adminState.topupRequests.some((item) => item.id === requestId)) {
+          return null;
+        }
 
         return {
           id: requestId,
@@ -1258,10 +1280,11 @@
           customerId,
           customerName,
           amount: +amount.toFixed(2),
-          slipImage: slipData,
+          slipImage,
           submittedAt,
           status: 'รออนุมัติ',
           creditAdded: false,
+          reviewedBy: '',
           reviewedAt: ''
         };
       }
@@ -1272,11 +1295,10 @@
         if (!req) {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
-            msgEl.textContent = 'ข้อมูลคำขอเติมเงินไม่ครบหรือไม่ถูกต้อง (ต้องระบุจำนวนเงินที่มากกว่า 0 บาท)';
+            msgEl.textContent = 'คำขอเติมเงินไม่ผ่านการตรวจสอบ (ยอดเงินต้องมากกว่า 0 บาท, รหัสคำขอไม่ซ้ำ และไฟล์สลิปต้องถูกต้อง)';
           }
           return null;
         }
-        // ยืนยันว่าเมื่อได้รับคำขอ สถานะเริ่มต้นเป็น "รออนุมัติ" และเครดิตไม่ถูกเพิ่ม
         req.status = 'รออนุมัติ';
         req.creditAdded = false;
         adminState.topupRequests.unshift(req);
@@ -1297,11 +1319,10 @@
 
         metaEl.textContent = `รหัสคำขอ: ${req.id} | บัญชี: ${req.accountKey} | ลูกค้า: ${req.customerName} | ยอดเติม: ฿${money(req.amount)} | สถานะ: ${req.status}`;
 
-        if (!req.slipImage) {
-          bodyEl.innerHTML = '<div class="info-box" style="text-align:center;">ไม่พบไฟล์รูปสลิปการโอนเงินในคำขอนี้</div>';
+        if (!req.slipImage || !isSafeSlipSrc(req.slipImage)) {
+          bodyEl.innerHTML = '<div class="info-box" style="text-align:center;">ไม่พบไฟล์รูปสลิปการโอนเงินที่ปลอดภัยในคำขอนี้</div>';
         } else {
-          const safeSrc = esc(req.slipImage);
-          bodyEl.innerHTML = `<img class="slip-modal-img" src="${safeSrc}" alt="รูปสลิปคำขอ ${esc(req.id)}" />`;
+          bodyEl.innerHTML = `<img class="slip-modal-img" src="${esc(req.slipImage)}" alt="รูปสลิปคำขอ ${esc(req.id)}" />`;
         }
         modal.classList.add('open');
       }
@@ -1337,10 +1358,16 @@
         processingTopupIds.add(requestId);
         renderTopupRequestsSection();
 
+        const prevStatus = req.status;
+        const prevCreditAdded = req.creditAdded;
+        const prevReviewedBy = req.reviewedBy;
+        const prevReviewedAt = req.reviewedAt;
+
         try {
-          req.customerId = targetCustomer.id;
           req.status = 'อนุมัติ';
           req.creditAdded = true;
+          req.customerId = targetCustomer.id;
+          req.reviewedBy = 'Admin';
           req.reviewedAt = new Date().toLocaleString('th-TH');
 
           const applied = await adjustCredit(
@@ -1351,9 +1378,10 @@
           );
 
           if (!applied) {
-            req.status = 'รออนุมัติ';
-            req.creditAdded = false;
-            req.reviewedAt = '';
+            req.status = prevStatus;
+            req.creditAdded = prevCreditAdded;
+            req.reviewedBy = prevReviewedBy;
+            req.reviewedAt = prevReviewedAt;
             return;
           }
 
@@ -1361,12 +1389,23 @@
             requestId: req.id,
             status: req.status,
             customerId: targetCustomer.id,
-            amount: req.amount
+            amount: req.amount,
+            reviewedBy: req.reviewedBy,
+            reviewedAt: req.reviewedAt
           });
 
           if (msgEl) {
             msgEl.style.color = '#059669';
             msgEl.textContent = `อนุมัติคำขอเติมเงิน ${req.id} สำเร็จ — เพิ่มเครดิต ฿${money(req.amount)} ให้บัญชี ${targetCustomer.name} (${req.accountKey}) แล้ว`;
+          }
+        } catch (err) {
+          req.status = prevStatus;
+          req.creditAdded = prevCreditAdded;
+          req.reviewedBy = prevReviewedBy;
+          req.reviewedAt = prevReviewedAt;
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `เกิดข้อผิดพลาดระหว่างอนุมัติคำขอ ${req.id} — ยกเลิกการเปลี่ยนสถานะและเครดิตแล้ว`;
           }
         } finally {
           processingTopupIds.delete(requestId);
@@ -1393,16 +1432,18 @@
         renderTopupRequestsSection();
 
         try {
-          // ปฏิเสธ: ห้ามเพิ่มเครดิต และห้ามเรียก adjustCredit
           req.status = 'ปฏิเสธ';
           req.creditAdded = false;
+          req.reviewedBy = 'Admin';
           req.reviewedAt = new Date().toLocaleString('th-TH');
 
           await AdminDataAdapter.reviewTopupRequest({
             requestId: req.id,
             status: req.status,
             accountKey: req.accountKey,
-            amount: req.amount
+            amount: req.amount,
+            reviewedBy: req.reviewedBy,
+            reviewedAt: req.reviewedAt
           });
 
           if (msgEl) {
@@ -1419,12 +1460,20 @@
         const bodyEl = $('topupRequestsBody');
         if (!bodyEl) return;
 
-        if (!adminState.topupRequests.length) {
-          bodyEl.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:18px;">ยังไม่มีรายการคำขอเติมเงิน</td></tr>';
+        const filterMode = adminState.topupFilter || 'ทั้งหมด';
+        const filtered = filterMode === 'ทั้งหมด'
+          ? adminState.topupRequests
+          : adminState.topupRequests.filter((r) => r.status === filterMode);
+
+        if (!filtered.length) {
+          const emptyText = filterMode === 'ทั้งหมด'
+            ? 'ยังไม่มีรายการคำขอเติมเงิน'
+            : `ไม่พบรายการคำขอเติมเงินสถานะ "${filterMode}"`;
+          bodyEl.innerHTML = `<tr><td colspan="9" style="text-align:center;color:#64748b;padding:18px;">${esc(emptyText)}</td></tr>`;
           return;
         }
 
-        bodyEl.innerHTML = adminState.topupRequests.map((req) => {
+        bodyEl.innerHTML = filtered.map((req) => {
           let badgeClass = 'b-wait';
           if (req.status === 'อนุมัติ') badgeClass = 'b-ok';
           else if (req.status === 'ปฏิเสธ') badgeClass = 'b-err';
@@ -1432,10 +1481,14 @@
           const isPending = req.status === 'รออนุมัติ' && req.creditAdded !== true;
           const isBusy = processingTopupIds.has(req.id);
 
-          const slipCell = req.slipImage
+          const slipCell = req.slipImage && isSafeSlipSrc(req.slipImage)
             ? `<img class="slip-thumb" src="${esc(req.slipImage)}" alt="สลิป ${esc(req.id)}" />`
-              + `<button type="button" class="btn btn-ghost js-view-slip" data-rid="${esc(req.id)}" style="padding:4px 9px;font-size:12px;">ดูสลิป</button>`
+              + `<button type="button" class="btn btn-ghost js-view-slip" data-rid="${esc(req.id)}" style="padding:4px 9px;font-size:12px;">ดูสลิปขนาดใหญ่</button>`
             : `<button type="button" class="btn btn-ghost js-view-slip" data-rid="${esc(req.id)}" style="padding:4px 9px;font-size:12px;">ไม่มีรูปสลิป</button>`;
+
+          const auditCell = req.reviewedAt
+            ? `${esc(req.reviewedBy || 'Admin')} (${esc(req.reviewedAt)})`
+            : '<span style="color:#64748b;">-</span>';
 
           const actionCell = isPending
             ? `<button type="button" class="btn btn-success js-approve-topup" data-rid="${esc(req.id)}" ${isBusy ? 'disabled' : ''} style="padding:5px 10px;font-size:12px;">${isBusy ? 'กำลังอนุมัติ...' : 'อนุมัติ'}</button>`
@@ -1450,6 +1503,7 @@
             <td>${slipCell}</td>
             <td>${esc(req.submittedAt)}</td>
             <td><span class="badge ${badgeClass}">${esc(req.status)}</span></td>
+            <td>${auditCell}</td>
             <td>${actionCell}</td>
           </tr>`;
         }).join('');
@@ -1740,6 +1794,16 @@
       });
 
       $('refreshTopupRequestsBtn')?.addEventListener('click', () => {
+        renderTopupRequestsSection();
+      });
+
+      $('topupFilterGroup')?.addEventListener('click', (e) => {
+        const fBtn = e.target.closest('.js-topup-filter');
+        if (!fBtn) return;
+        adminState.topupFilter = fBtn.dataset.filter || 'ทั้งหมด';
+        Array.from(document.querySelectorAll('.js-topup-filter')).forEach((b) => {
+          b.classList.toggle('active-filter', b === fBtn);
+        });
         renderTopupRequestsSection();
       });
 
