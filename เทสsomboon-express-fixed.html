@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Somboon Express | ระบบจัดการนำเข้าสินค้าและสั่งซื้อ 1688</title>
+<style>
+:root{--navy:#10243a;--navy2:#183653;--blue:#2878c7;--cyan:#27b5c7;--bg:#f3f6fa;--ink:#1e293b;--muted:#718096;--line:#e5ebf2;--white:#fff;--green:#16a477;--orange:#f0a33a;--red:#dc5b65;--shadow:0 8px 24px rgba(18,45,72,.07)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Tahoma,"Noto Sans Thai",Arial,sans-serif;color:var(--ink)}
+button,input,select{font:inherit}button{cursor:pointer}.app{min-height:100vh}
+.topbar{height:72px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20;box-shadow:0 4px 15px #0b1c2c30}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:21px;letter-spacing:.3px}.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),#2473c5);display:grid;place-items:center;font-weight:900;font-size:18px}
+.top-right{display:flex;align-items:center;gap:10px;font-size:13px;color:#d7e5f2}.avatar{width:34px;height:34px;border-radius:50%;background:#d7eaf7;color:var(--navy);display:grid;place-items:center;font-weight:bold}
+.auth-btn{border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:bold;color:#fff;background:rgba(255,255,255,.08)}
+.auth-btn:hover{background:rgba(255,255,255,.18)}
+.auth-btn.primary{border:0;background:var(--cyan);color:#082032}
+.auth-btn.primary:hover{background:#34c7da}
+.auth-btn.logout{border:1px solid rgba(255,130,140,.45);background:rgba(220,91,101,.18);color:#ffd6da}
+
+.linkbar{background:#fff;border-bottom:1px solid var(--line);padding:12px 28px;display:flex;gap:10px;align-items:center}.linkbar label{font-size:13px;font-weight:bold;color:#526174;white-space:nowrap}.linkbar input{flex:1;min-width:120px;border:1px solid #dce4ed;border-radius:9px;padding:10px 12px;outline:none}.linkbar input:focus{border-color:#3a91d1;box-shadow:0 0 0 3px #3a91d11a}.linkbar button{border:0;border-radius:9px;padding:10px 16px;background:var(--blue);color:#fff;font-weight:bold}
+.layout{display:grid;grid-template-columns:240px 1fr;max-width:1600px;margin:auto}.sidebar{background:#fff;min-height:calc(100vh - 72px);padding:22px 14px;border-right:1px solid var(--line)}.side-label{font-size:11px;color:#9aa7b6;font-weight:bold;letter-spacing:1px;padding:12px 13px 8px}.navbtn{width:100%;border:0;background:transparent;text-align:left;padding:12px 13px;border-radius:10px;color:#536276;display:flex;gap:12px;align-items:center;margin:3px 0;font-size:14px}.navbtn:hover,.navbtn.active{background:#eaf4fc;color:#1767aa;font-weight:bold}.navbtn span:first-child{width:20px;text-align:center;font-size:17px}.main{padding:28px;min-width:0}.pagehead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px}.pagehead h1{font-size:25px;margin:0 0 5px;color:#152c43}.sub{color:var(--muted);font-size:13px}.date{font-size:12px;color:#7b8999;background:#fff;border:1px solid var(--line);padding:10px 13px;border-radius:10px}
+.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px;box-shadow:var(--shadow)}.stat{display:flex;justify-content:space-between;align-items:center}.stat .label{color:#718096;font-size:12px}.stat .num{font-size:25px;font-weight:800;margin-top:8px;color:#183653}.stat .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:#eaf4fc}.stat:nth-child(2) .ico{background:#e8f8f2}.stat:nth-child(3) .ico{background:#fff4e4}.stat:nth-child(4) .ico{background:#f2edff}
+.quick{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:18px}.quick button{border:0;border-radius:13px;padding:16px;color:#fff;text-align:left;background:linear-gradient(135deg,#2377bd,#164a7c);box-shadow:var(--shadow)}.quick button:nth-child(2){background:linear-gradient(135deg,#20a88e,#14735f)}.quick button:nth-child(3){background:linear-gradient(135deg,#e6a23b,#c47a1c)}.quick button:nth-child(4){background:linear-gradient(135deg,#6477c7,#414f98)}.quick b{display:block;font-size:15px;margin-bottom:5px}.quick small{opacity:.85}
+.two{grid-template-columns:1fr 1fr}.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.section-title h2{font-size:16px;margin:0}.section-title small{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}th{text-align:left;color:#718096;background:#f7f9fc;font-size:11px;font-weight:700;padding:12px}td{padding:12px;border-top:1px solid var(--line)}.pill{display:inline-block;padding:5px 9px;border-radius:30px;font-size:11px;background:#edf5ff;color:#2878c7}.pill.green{background:#e8f8f1;color:#14835f}.pill.orange{background:#fff4e5;color:#b87516}.muted{color:var(--muted)}.page{display:none}.page.active{display:block}
+.formgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.field label{display:block;font-size:12px;font-weight:bold;color:#526174;margin-bottom:7px}.field input,.field select{width:100%;border:1px solid #dce4ed;border-radius:9px;padding:11px 12px;background:#fff;outline:none}.field input:focus,.field select:focus{border-color:#3a91d1;box-shadow:0 0 0 3px #3a91d11a}.btn{border:0;border-radius:9px;padding:10px 15px;background:var(--blue);color:#fff;font-weight:bold;font-size:13px}.btn.secondary{background:#edf3f8;color:#42566b}.btn.green{background:var(--green)}.btn.danger{background:#fff0f0;color:#c64c56}.btn:disabled{opacity:.55;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.result{background:#eff8ff;border:1px solid #d5eaf8;padding:16px;border-radius:12px;margin-top:16px}.result strong{font-size:23px;color:#1767aa}.notice{background:#fff8e9;border:1px solid #f4e3bd;color:#80612c;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.6;margin-top:14px}.addr{font-size:13px;line-height:1.8;word-break:break-word}.addr h3{font-size:14px;margin:0 0 7px;color:#1b5e91}.addr-card{border:1px solid var(--line);padding:15px;border-radius:12px;margin:10px 0}.hidden{display:none!important}.empty{text-align:center;color:var(--muted);padding:20px}
+.product-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;margin-top:16px;box-shadow:var(--shadow)}
+.product-flex{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.product-img{width:160px;height:160px;border:1px solid var(--line);border-radius:10px;object-fit:cover;background:#fafbfc;display:grid;place-items:center;color:var(--muted);font-size:12px}
+.status-tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;background:#eef6ff;color:#1b5e91;margin-top:6px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
+
+.portal-gate{max-width:520px;margin:48px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow)}
+.portal-banner{background:linear-gradient(135deg,#10243a,#1b4b72);color:#fff;border-radius:14px;padding:18px;margin-bottom:18px}
+
+.auth-modal-backdrop{position:fixed;inset:0;background:rgba(10,22,38,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.auth-modal-backdrop.open{display:flex}
+.auth-modal{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:22px;box-shadow:0 20px 45px rgba(0,0,0,.22)}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f1f5f9;padding:5px;border-radius:10px;margin-bottom:16px}
+.auth-tab{border:0;background:transparent;padding:9px;border-radius:8px;font-weight:bold;color:#475569}
+.auth-tab.active{background:#fff;color:#10243a;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.auth-field{margin-bottom:12px}
+.auth-field label{display:block;font-size:12px;font-weight:bold;color:#475569;margin-bottom:5px}
+.auth-field input{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:10px 12px;outline:none}
+.auth-field input:focus{border-color:var(--blue)}
+
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.sidebar{min-height:0;display:flex;overflow:auto;padding:8px;position:sticky;top:72px;z-index:10}.side-label{display:none}.navbtn{white-space:nowrap;width:auto;margin:0 3px}.stats{grid-template-columns:repeat(2,1fr)}.quick{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.linkbar{padding:10px 13px;flex-wrap:wrap}.linkbar label{width:100%}.linkbar input{width:100%;flex:1 1 100%}.linkbar button{width:100%}.topbar{padding:0 14px;gap:8px}.brand{font-size:16px}.top-right .usertext{display:none}.auth-btn{padding:6px 9px;font-size:11px}.main{padding:18px 13px}.pagehead h1{font-size:21px}.date{display:none}.two,.formgrid{grid-template-columns:1fr}.stats{gap:10px}.card{padding:14px}.stat .num{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+<div class="brand"><div class="logo">S</div><span>SOMBOON EXPRESS</span></div>
+<div class="top-right" id="topbarAuthArea"></div>
+</header>
+
+<div id="portalGate" class="portal-gate">
+  <div class="portal-banner">
+    <div style="font-size:18px;font-weight:800;margin-bottom:6px;">เข้าสู่พื้นที่ส่วนตัวของคุณ</div>
+    <div style="font-size:13px;opacity:.9;line-height:1.5;">ล็อกอินหรือสมัครสมาชิกเพื่อเปิดหน้าจัดการ รายการสั่งซื้อ พัสดุ การเงิน และตั้งค่าเฉพาะบัญชีของคุณ</div>
+  </div>
+
+  <div class="auth-tabs">
+    <button type="button" id="gateTabLogin" class="auth-tab active" onclick="switchGateTab('login')">ล็อกอินเข้าบัญชี</button>
+    <button type="button" id="gateTabRegister" class="auth-tab" onclick="switchGateTab('register')">สมัครสมาชิกใหม่</button>
+  </div>
+
+  <form id="gateForm" onsubmit="submitGateForm(event)">
+    <div id="gateRegNameField" class="auth-field" style="display:none;">
+      <label for="gateFullName">ชื่อผู้ใช้งาน / ชื่อร้าน</label>
+      <input id="gateFullName" type="text" placeholder="เช่น คุณสมชาย หรือ ร้านบาสกีตาร์">
+    </div>
+    <div class="auth-field">
+      <label for="gateContact">อีเมล หรือ เบอร์โทรศัพท์</label>
+      <input id="gateContact" type="text" required placeholder="กรอกอีเมลหรือเบอร์โทรเพื่อเข้าหน้าของคนนั้น">
+    </div>
+    <div class="auth-field">
+      <label for="gatePass">รหัสผ่าน</label>
+      <input id="gatePass" type="password" required placeholder="กรอกรหัสผ่าน">
+    </div>
+    <div id="gateMsg" style="font-size:12px;color:#c64c56;margin-bottom:10px;min-height:16px;"></div>
+    <button type="submit" id="gateSubmitBtn" class="btn" style="width:100%;padding:12px;">เข้าสู่หน้าของบัญชีนี้</button>
+  </form>
+</div>
+
+<div id="workspaceShell" class="hidden">
+<div class="linkbar">
+<label for="quickUrl">URL ของ taobao.com tmall.com หรือ 1688.com</label>
+<input id="quickUrl" type="url" placeholder="วางลิงก์ 1688 / Taobao / Tmall ได้ทุกลิงก์..." value="">
+<button type="button" onclick="openQuickLink(false)">🔍 ดึงข้อมูลสินค้า</button>
+<button type="button" style="background:#183653" onclick="openQuickLink(true)">↗ เปิดลิงก์ด้วย</button>
+</div>
+
+<div class="layout">
+<aside class="sidebar">
+<div class="side-label">เมนูหลัก</div>
+<button class="navbtn active" data-page="dashboard"><span>📊</span>Dashboard</button>
+<button class="navbtn" data-page="scraper"><span>🔗</span>สั่งซื้อสินค้า (ดึงลิงก์)</button>
+<button class="navbtn" data-page="orders"><span>🛒</span>รายการสั่งซื้อสินค้า</button>
+<button class="navbtn" data-page="parcels"><span>📦</span>รายการพัสดุ</button>
+<button class="navbtn" data-page="deliveries"><span>🚚</span>รายการจัดส่ง</button>
+<button class="navbtn" data-page="payments"><span>฿</span>การชำระเงิน</button>
+<button class="navbtn" data-page="calculator"><span>🧮</span>คำนวณค่าขนส่ง</button>
+<button class="navbtn" data-page="warehouses"><span>🏭</span>ที่อยู่โกดังจีน</button>
+<div class="side-label">ตั้งค่าระบบ</div>
+<button class="navbtn" data-page="settings"><span>⚙</span>ตั้งค่าเรทและข้อมูล</button>
+</aside>
+
+<main class="main">
+<section id="dashboard" class="page active">
+<div class="pagehead">
+  <div>
+    <h1 id="dashWelcomeTitle">Dashboard</h1>
+    <div class="sub" id="dashAccountSub">ภาพรวมการจัดการนำเข้าสินค้าและขนส่ง</div>
+  </div>
+  <div class="date" id="today"></div>
+</div>
+<div class="grid stats">
+<div class="card stat"><div><div class="label">ยอดเงินคงเหลือ (บาท)</div><div class="num" id="balanceStat">0.00</div></div><div class="ico">฿</div></div>
+<div class="card stat"><div><div class="label">รายการสั่งซื้อ</div><div class="num" id="orderStat">0</div></div><div class="ico">🛒</div></div>
+<div class="card stat"><div><div class="label">พัสดุในระบบ</div><div class="num" id="parcelStat">0</div></div><div class="ico">📦</div></div>
+<div class="card stat"><div><div class="label">รายการจัดส่ง</div><div class="num" id="deliveryStat">0</div></div><div class="ico">🚚</div></div>
+</div>
+<div class="grid quick">
+<button onclick="showPage('orders')"><b>🔗 รายการสั่งซื้อสินค้า</b><small>วางลิงก์ดึงข้อมูลสินค้า</small></button>
+<button onclick="showPage('parcels')"><b>＋ รายการสินค้าเข้าคลัง</b><small>ติดตามพัสดุจากจีน</small></button>
+<button onclick="showPage('payments')"><b>฿ โอนเงินจ่ายค่าสินค้า</b><small>เติมเงินและบันทึกรายจ่าย</small></button>
+<button onclick="showPage('deliveries')"><b>🚚 สร้างใบจัดส่งสินค้า</b><small>บันทึกเลขพัสดุปลายทาง</small></button>
+</div>
+<div class="grid two">
+<div class="card"><div class="section-title"><h2>รายการสั่งซื้อล่าสุด</h2><button class="btn secondary" onclick="showPage('orders')">ดูทั้งหมด</button></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>รายละเอียด</th><th>ยอดรวม</th><th>สถานะ</th></tr></thead><tbody id="dashOrders"></tbody></table></div></div>
+<div class="card"><div class="section-title"><h2>พัสดุล่าสุด</h2><button class="btn secondary" onclick="showPage('parcels')">ดูทั้งหมด</button></div><div class="table-wrap"><table><thead><tr><th>เลขพัสดุ</th><th>Lot</th><th>สถานะ</th></tr></thead><tbody id="dashParcels"></tbody></table></div></div>
+</div>
+</section>
+
+<section id="scraper" class="page">
+<div class="pagehead"><div><h1>รายละเอียดสินค้า (1688 / Taobao / Tmall)</h1><div class="sub">รองรับการวางลิงก์ทุกรูปแบบ แกะรหัสสินค้า ดึงข้อมูล และเลือกสเปคสั่งซื้อ</div></div></div>
+<div class="card">
+<div class="field"><label>URL ของสินค้า (1688.com / Taobao / Tmall)</label><input id="pUrlInput" type="text" placeholder="วางลิงก์สินค้าได้ทุกรูปแบบ..." value=""></div>
+<div class="formgrid" style="margin-top:10px;">
+<div class="field"><label>แพลตฟอร์ม / รหัสสินค้า</label><input id="pMetaInput" type="text" readonly placeholder="ระบบจะแกะให้อัตโนมัติ"></div>
+<div class="field"><label>ชื่อร้านค้า</label><input id="pShopInput" type="text" value="" placeholder="ชื่อร้านค้า"></div>
+<div class="field"><label>ลิงก์รูปสินค้า (วางลิงก์รูปเองได้)</label><input id="pImgUrlInput" type="text" value="" placeholder="https://cbu01.alicdn.com/..." oninput="applyCustomImg()"></div>
+</div>
+<div class="actions">
+<button class="btn" id="btnFetchProd" onclick="fetchProductData()">🔍 ดึงข้อมูลสินค้า</button>
+<button class="btn secondary" type="button" onclick="openCurrentProductUrl()">↗ เปิดหน้าเว็บต้นทาง</button>
+</div>
+<div id="fetchStatusBox" class="status-tag" style="display:none;"></div>
+<div class="notice">หมายเหตุ: หากลิงก์ 1688 หรือ Taobao ติด Login หรือบล็อกการดึงข้อมูลจากภายนอก ระบบจะดึงข้อมูลที่เปิดเผยได้ให้ก่อน และเปิดตารางสเปคให้กรอกราคาหยวน (¥) เพื่อแปลงเป็นบาท (฿) อัตโนมัติทันที</div>
+</div>
+
+<div class="product-card">
+<div class="product-flex">
+<div>
+<img id="productImg" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='160' height='160' fill='%23eef2f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23718096' font-family='sans-serif' font-size='13'%3ENo Image%3C/text%3E%3C/svg%3E" alt="รูปสินค้า" class="product-img">
+</div>
+<div style="flex:1;min-width:250px;">
+<div id="pTitle" style="font-size:18px;margin-top:0;color:var(--navy)">กรุณาวางลิงก์ 1688 / Taobao แล้วกดดึงข้อมูลสินค้า</div>
+<p class="muted" style="font-size:13px;margin:8px 0 0;">ลิงก์ต้นทาง: <span id="pDisplayUrl" style="color:var(--blue)">-</span></p>
+</div>
+</div>
+
+<div id="variantsArea" style="margin-top:20px;">
+<div class="empty">ยังไม่มีข้อมูลสินค้า กรุณากรอกลิงก์ด้านบน</div>
+</div>
+
+<div id="cartActionBox" style="display:none;">
+<hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+<div>จำนวนที่สั่งซื้อ <span id="totalQty" style="font-weight:bold;color:var(--blue)">0</span> ชิ้น | รวมราคาสินค้า <span id="totalYuan" style="font-weight:bold">0.00</span> ¥ (<span id="totalBaht" style="font-weight:bold;color:var(--green)">0.00</span> ฿)</div>
+<button class="btn green" onclick="addToCartFromScraper()">เพิ่มสินค้าในตะกร้า</button>
+</div>
+</div>
+</div>
+</section>
+
+<section id="orders" class="page">
+<div class="pagehead"><div><h1>รายการสั่งซื้อสินค้า</h1><div class="sub">จัดเก็บรายการ Pre-order และรายการที่สั่งซื้อด้วยตัวเอง</div></div></div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการทั้งหมด</h2><small id="orderCount"></small></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>รายละเอียด</th><th>ประเภท</th><th>ยอด (บาท)</th><th>สถานะ</th><th>วันที่</th><th></th></tr></thead><tbody id="ordersTable"></tbody></table></div></div>
+</section>
+
+<section id="parcels" class="page">
+<div class="pagehead"><div><h1>รายการพัสดุ</h1><div class="sub">ติดตามพัสดุจากโกดังจีนจนถึงประเทศไทย</div></div></div>
+<div class="card">
+<div class="section-title"><h2>เพิ่มพัสดุเข้าคลัง</h2></div>
+<div class="formgrid">
+<div class="field"><label>เลขพัสดุ / Tracking</label><input id="pTrack" placeholder="เลข Tracking"></div>
+<div class="field"><label>Lot No.</label><input id="pLot" placeholder="เช่น TA-2709"></div>
+<div class="field"><label>ชื่อสินค้า</label><input id="pNameInput" placeholder="รายละเอียดสินค้า"></div>
+<div class="field"><label>น้ำหนัก (กก.)</label><input id="pWeight" type="number" min="0" step=".01"></div>
+<div class="field"><label>สถานะ</label><select id="pStatus"><option>รอเข้าคลังจีน</option><option>เข้าคลังจีนแล้ว</option><option>กำลังเดินทาง</option><option>ถึงประเทศไทย</option><option>พร้อมจัดส่ง</option></select></div>
+<div class="field"><label>วันที่รับเข้าระบบ</label><input id="pDate" type="date"></div>
+</div>
+<div class="actions"><button class="btn" onclick="addParcel()">บันทึกพัสดุ</button></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>พัสดุทั้งหมด</h2><small id="parcelCount"></small></div><div class="table-wrap"><table><thead><tr><th>Tracking</th><th>Lot</th><th>สินค้า</th><th>น้ำหนัก</th><th>สถานะ</th><th>วันที่</th><th></th></tr></thead><tbody id="parcelsTable"></tbody></table></div></div>
+</section>
+
+<section id="deliveries" class="page">
+<div class="pagehead"><div><h1>รายการจัดส่งสินค้า</h1><div class="sub">บันทึกเลขพัสดุปลายทางและสถานะการจัดส่ง</div></div></div>
+<div class="card">
+<div class="formgrid">
+<div class="field"><label>เลขที่จัดส่ง</label><input id="dId" placeholder="เช่น DE-0001"></div>
+<div class="field"><label>ผู้รับ</label><input id="dReceiver" placeholder="ชื่อผู้รับ"></div>
+<div class="field"><label>เลข Tracking ปลายทาง</label><input id="dTrack" placeholder="เลขขนส่งไทย"></div>
+<div class="field"><label>บริษัทขนส่ง</label><input id="dCompany" placeholder="เช่น ไปรษณีย์ไทย"></div>
+<div class="field"><label>ค่าจัดส่ง (บาท)</label><input id="dFee" type="number" min="0" step=".01"></div>
+<div class="field"><label>สถานะ</label><select id="dStatus"><option>เตรียมจัดส่ง</option><option>จัดส่งแล้ว</option><option>สำเร็จ</option></select></div>
+</div><div class="actions"><button class="btn" onclick="addDelivery()">บันทึกการจัดส่ง</button></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการจัดส่ง</h2></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>ผู้รับ</th><th>Tracking</th><th>บริษัท</th><th>ค่าจัดส่ง</th><th>สถานะ</th><th></th></tr></thead><tbody id="deliveriesTable"></tbody></table></div></div>
+</section>
+
+<section id="payments" class="page">
+<div class="pagehead"><div><h1>การชำระเงินและบัญชี</h1><div class="sub">บันทึกเงินเข้า เงินออก และยอดคงเหลือในระบบ</div></div></div>
+<div class="grid stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<div class="card"><div class="label">ยอดเงินคงเหลือ</div><div class="num" id="balanceBig">฿0.00</div></div>
+<div class="card"><div class="label">รายการเดินบัญชี</div><div class="num" id="paymentCount">0</div></div>
+</div>
+<div class="card">
+<div class="formgrid">
+<div class="field"><label>ประเภทรายการ</label><select id="payType"><option value="in">เติมเงิน / เงินเข้า</option><option value="out">ถอนเงิน / เงินออก</option></select></div>
+<div class="field"><label>จำนวนเงิน (บาท)</label><input id="payAmount" type="number" min="0.01" step=".01"></div>
+<div class="field"><label>รายละเอียด</label><input id="payNote" placeholder="เช่น เติมเงินค่าสินค้า"></div>
+</div><div class="actions"><button class="btn green" onclick="addPayment()">บันทึกรายการเงิน</button></div>
+</div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการสินค้าที่รอชำระเงิน</h2><small id="pendingOrderCount">0 รายการ</small></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>รายละเอียด</th><th>ยอด (บาท)</th><th>สถานะ</th><th></th></tr></thead><tbody id="pendingOrdersTable"></tbody></table></div></div>
+<div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการเดินบัญชี</h2></div><div class="table-wrap"><table><thead><tr><th>วันเวลา</th><th>รายละเอียด</th><th>เงินเข้า</th><th>เงินออก</th><th>ยอดคงเหลือ</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
+</section>
+
+<section id="calculator" class="page">
+<div class="pagehead"><div><h1>คำนวณค่านำเข้าสินค้าจากจีน</h1><div class="sub">คำนวณปริมาตรและน้ำหนักสินค้าเพื่อประมาณการค่าขนส่ง</div></div></div>
+<div class="card">
+<div class="formgrid">
+<div class="field"><label>บริการ</label><select id="cService" onchange="calculateCost()"><option>Pre-order</option><option>สั่งซื้อเอง</option></select></div>
+<div class="field"><label>การขนส่ง</label><select id="cTransport" onchange="calculateCost()"><option value="truck">ขนส่งทางรถ</option><option value="ship">ขนส่งทางเรือ</option></select></div>
+<div class="field"><label>ประเภทสินค้า</label><select id="cProduct" onchange="calculateCost()"><option>สินค้าทั่วไป</option><option>สินค้า มอก.</option><option>สินค้าพิเศษ</option><option>สินค้า อย. พิเศษ</option><option>เสื้อผ้าทั่วไป</option><option>เสื้อผ้าพิเศษ</option></select></div>
+<div class="field"><label>กว้าง (ซม.)</label><input id="dimX" type="number" min="0" step=".1" oninput="calcVolume()"></div>
+<div class="field"><label>ยาว (ซม.)</label><input id="dimY" type="number" min="0" step=".1" oninput="calcVolume()"></div>
+<div class="field"><label>สูง (ซม.)</label><input id="dimZ" type="number" min="0" step=".1" oninput="calcVolume()"></div>
+<div class="field"><label>น้ำหนัก (กก.)</label><input id="dimW" type="number" min="0" step=".01" oninput="calculateCost()"></div>
+<div class="field"><label>ปริมาตร (CBM)</label><input id="volume" readonly value="0.0000"></div>
+<div class="field"><label>คิดราคาจาก</label><input id="billBy" readonly value="-"></div>
+</div>
+<div class="result"><div class="muted">ประมาณการค่าขนส่ง</div><strong id="costResult">กรุณาตั้งเรทค่าขนส่ง</strong><div class="muted" id="costDetail">ตั้งค่าเรทที่เมนู "ตั้งค่าเรทและข้อมูล"</div></div>
+</div>
+</section>
+
+<section id="warehouses" class="page">
+<div class="pagehead"><div><h1>ที่อยู่โกดังจีน</h1><div class="sub">ที่อยู่สำหรับสั่งสินค้าเอง</div></div></div>
+<div class="card">
+<div class="addr-card addr"><h3>ทางรถ</h3>(SHAMAN) 仓库地址<br>广州市白云区白云湖街道石井镇龙湖村龙滘路376号办公楼101号 邮编：510430 电话号码：18665659756</div>
+<div class="addr-card addr"><h3>ทางเรือ</h3>(SHAMAN 海运) 仓库地址<br>广州市白云区白云湖街道石井镇龙湖村龙滘路376号办公楼101号 邮编：510430 电话号码：18819131815</div>
+</div>
+</section>
+
+<section id="settings" class="page">
+<div class="pagehead"><div><h1>ตั้งค่าเรทและข้อมูล</h1><div class="sub">กำหนดเรทเงินหยวนและอัตราค่าขนส่ง</div></div></div>
+<div class="card">
+<h2 style="font-size:16px;margin-top:0">เรทเงินและอัตราค่าขนส่ง</h2>
+<div class="formgrid">
+<div class="field"><label>เรทเงินหยวน (บาท / 1 ¥)</label><input id="rateYuan" type="number" min="0" step=".01" placeholder="เช่น 5.30"></div>
+<div class="field"><label>ค่าขนส่งทางรถ (บาท / CBM)</label><input id="rateTruck" type="number" min="0" step=".01"></div>
+<div class="field"><label>ค่าขนส่งทางเรือ (บาท / CBM)</label><input id="rateShip" type="number" min="0" step=".01"></div>
+<div class="field"><label>ค่าขนส่งตามน้ำหนัก (บาท / กก.)</label><input id="rateKg" type="number" min="0" step=".01"></div>
+<div class="field"><label>ค่าขั้นต่ำ (บาท)</label><input id="minFee" type="number" min="0" step=".01"></div>
+</div>
+<div class="actions"><button class="btn" onclick="saveRates()">บันทึกเรท</button></div>
+</div>
+<div class="card" style="margin-top:16px">
+<div class="actions"><button class="btn secondary" onclick="exportData()">ส่งออกข้อมูล JSON</button><button class="btn danger" onclick="clearData()">ล้างข้อมูลทั้งหมด</button></div>
+</div>
+</section>
+<footer>© <span id="year"></span> SOMBOON EXPRESS · ระบบจัดการนำเข้าสินค้าและขนส่ง</footer>
+</main>
+</div>
+</div>
+</div>
+
+<div id="authModal" class="auth-modal-backdrop" onclick="if(event.target===this)closeAuthModal()">
+  <div class="auth-modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <strong style="font-size:17px;color:#10243a;">เข้าสู่บัญชี / สมัครสมาชิก</strong>
+      <button type="button" onclick="closeAuthModal()" style="border:0;background:#f1f5f9;border-radius:6px;padding:4px 10px;">✕</button>
+    </div>
+    <div class="auth-tabs">
+      <button type="button" id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">ล็อกอิน</button>
+      <button type="button" id="tabRegister" class="auth-tab" onclick="switchAuthTab('register')">สมัครสมาชิก</button>
+    </div>
+    <form id="authForm" onsubmit="submitAuthForm(event)">
+      <div id="regNameField" class="auth-field" style="display:none;">
+        <label for="authFullName">ชื่อผู้ใช้งาน / ชื่อร้าน</label>
+        <input id="authFullName" type="text" placeholder="กรอกชื่อผู้ใช้งาน">
+      </div>
+      <div class="auth-field">
+        <label for="authUserInput">อีเมล หรือ เบอร์โทรศัพท์</label>
+        <input id="authUserInput" type="text" required placeholder="เช่น bas@somboon.local หรือ 08x-xxx-xxxx">
+      </div>
+      <div class="auth-field">
+        <label for="authPassInput">รหัสผ่าน</label>
+        <input id="authPassInput" type="password" required placeholder="กรอกรหัสผ่าน">
+      </div>
+      <div id="authMsg" style="font-size:12px;color:#16a477;margin-bottom:10px;min-height:16px;"></div>
+      <button type="submit" id="authSubmitBtn" class="btn" style="width:100%;">เข้าสู่หน้าของคนนั้น</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const loadRaw=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const saveRaw=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+function sanitizeKey(s) {
+  return String(s || '').toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9ก-ฮะ-์@._-]/g, '_');
+}
+
+function hashPassword(pw) {
+  let h = 2166136261;
+  const str = String(pw || '');
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return 'h_' + (h >>> 0).toString(16);
+}
+
+function defaultAccountStore(name, contact, passwordHash = '') {
+  return {
+    profile: {
+      name: name || 'ผู้ใช้งาน',
+      contact: contact || '',
+      passwordHash
+    },
+    orders: [],
+    parcels: [],
+    deliveries: [],
+    payments: [],
+    rates: { yuan: '5.30', truck: '', ship: '', kg: '', min: '' }
+  };
+}
+
+let accountsStore = loadRaw('somboon_accounts', {});
+let sessionState = loadRaw('somboon_session', { activeKey: '', loggedIn: false });
+
+function ensureDemoAccounts() {
+  const demos = [
+    { name: 'บาส', contact: 'bas@somboon.local', pass: '123456' },
+    { name: 'ลูกค้า VIP 01', contact: 'vip01@somboon.local', pass: '123456' }
+  ];
+  let changed = false;
+  demos.forEach(d => {
+    const k = sanitizeKey(d.contact);
+    if (!accountsStore[k]) {
+      accountsStore[k] = defaultAccountStore(d.name, d.contact, hashPassword(d.pass));
+      changed = true;
+    }
+  });
+  if (changed) saveRaw('somboon_accounts', accountsStore);
+}
+ensureDemoAccounts();
+
+let orders = [], parcels = [], deliveries = [], payments = [];
+let rates = { yuan: '5.30', truck: '', ship: '', kg: '', min: '' };
+let currentAccountKey = '';
+const payingOrderIds = new Set();
+
+const BACKEND_API_BASE = 'http://localhost:3002/api/customer';
+
+function getCurrentAccountMeta() {
+  const acc = currentAccountKey ? accountsStore[currentAccountKey] : null;
+  return {
+    accountKey: currentAccountKey || '',
+    profile: acc?.profile || null
+  };
+}
+
+async function syncBackendAction(actionType, payload) {
+  const meta = getCurrentAccountMeta();
+  const body = {
+    action: actionType,
+    accountKey: meta.accountKey,
+    customerName: meta.profile?.name || '',
+    customerContact: meta.profile?.contact || '',
+    timestamp: new Date().toISOString(),
+    data: payload
+  };
+
+  const endpoints = [
+    `${BACKEND_API_BASE}/${actionType}`,
+    `/api/customer/${actionType}`
+  ];
+
+  for (const ep of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if (res.ok) {
+        try {
+          const json = await res.json();
+          return { ok: json?.ok !== false, offline: false, data: json, message: json?.message };
+        } catch {
+          return { ok: true, offline: false };
+        }
+      }
+      return { ok: false, offline: false, message: `เซิร์ฟเวอร์ตอบกลับสถานะ ${res.status}` };
+    } catch {}
+  }
+  return { ok: false, offline: true };
+}
+
+async function fetchBackendAccountState(accountKey) {
+  if (!accountKey) return null;
+  const endpoints = [
+    `${BACKEND_API_BASE}/state?accountKey=${encodeURIComponent(accountKey)}`,
+    `/api/customer/state?accountKey=${encodeURIComponent(accountKey)}`
+  ];
+  for (const ep of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 3000);
+      const res = await fetch(ep, { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && typeof json === 'object') {
+          return json.data || json;
+        }
+      }
+    } catch {}
+  }
+  return null;
+}
+
+function persistCurrentAccount(shouldSyncState = true) {
+  if (!currentAccountKey || !accountsStore[currentAccountKey]) return;
+  const prevProfile = accountsStore[currentAccountKey].profile || {};
+  accountsStore[currentAccountKey] = {
+    profile: {
+      name: prevProfile.name || 'ผู้ใช้งาน',
+      contact: prevProfile.contact || currentAccountKey,
+      passwordHash: prevProfile.passwordHash || ''
+    },
+    orders,
+    parcels,
+    deliveries,
+    payments,
+    rates
+  };
+  saveRaw('somboon_accounts', accountsStore);
+  if (shouldSyncState) {
+    syncBackendAction('sync_state', {
+      orders,
+      parcels,
+      deliveries,
+      payments,
+      rates
+    });
+  }
+}
+
+function loadAccountIntoWorkspace(key) {
+  if (!key || !accountsStore[key]) return false;
+  currentAccountKey = key;
+  const acc = accountsStore[key];
+  orders = Array.isArray(acc.orders) ? acc.orders : [];
+  parcels = Array.isArray(acc.parcels) ? acc.parcels : [];
+  deliveries = Array.isArray(acc.deliveries) ? acc.deliveries : [];
+  payments = Array.isArray(acc.payments) ? acc.payments : [];
+  rates = acc.rates || { yuan: '5.30', truck: '', ship: '', kg: '', min: '' };
+
+  sessionState = { activeKey: key, loggedIn: true };
+  saveRaw('somboon_session', sessionState);
+
+  syncRateInputs();
+  renderAuthView();
+  showPage('dashboard');
+  render();
+
+  fetchBackendAccountState(key).then(remote => {
+    if (!remote || currentAccountKey !== key) return;
+    let updated = false;
+    if (Array.isArray(remote.orders)) { orders = remote.orders; updated = true; }
+    if (Array.isArray(remote.parcels)) { parcels = remote.parcels; updated = true; }
+    if (Array.isArray(remote.deliveries)) { deliveries = remote.deliveries; updated = true; }
+    if (Array.isArray(remote.payments)) { payments = remote.payments; updated = true; }
+    if (remote.rates && typeof remote.rates === 'object') {
+      rates = { ...rates, ...remote.rates };
+      syncRateInputs();
+      updated = true;
+    }
+    if (updated) {
+      const prevProfile = accountsStore[key]?.profile || {};
+      accountsStore[key] = { profile: prevProfile, orders, parcels, deliveries, payments, rates };
+      saveRaw('somboon_accounts', accountsStore);
+      render();
+    }
+  });
+
+  return true;
+}
+
+function registerAccount(name, contact, password) {
+  const cleanContact = String(contact || '').trim();
+  const key = sanitizeKey(cleanContact);
+  const cleanPass = String(password || '');
+
+  if (!cleanContact) {
+    return { ok: false, message: 'กรุณากรอกอีเมลหรือเบอร์โทรศัพท์' };
+  }
+  if (!key) {
+    return { ok: false, message: 'รูปแบบอีเมลหรือเบอร์โทรศัพท์ไม่ถูกต้อง' };
+  }
+  if (cleanPass.length < 4) {
+    return { ok: false, message: 'กรุณาตั้งรหัสผ่านอย่างน้อย 4 ตัวอักษร' };
+  }
+  if (accountsStore[key]) {
+    return { ok: false, message: 'บัญชีนี้ถูกสมัครสมาชิกไว้แล้ว กรุณาเปลี่ยนไปแท็บล็อกอิน' };
+  }
+
+  const cleanName = (name || cleanContact).trim();
+  accountsStore[key] = defaultAccountStore(cleanName, cleanContact, hashPassword(cleanPass));
+  saveRaw('somboon_accounts', accountsStore);
+  loadAccountIntoWorkspace(key);
+  syncBackendAction('register', { accountKey: key, name: cleanName, contact: cleanContact });
+  return { ok: true, message: 'สมัครสมาชิกและเข้าสู่ระบบสำเร็จ' };
+}
+
+function loginAccount(contact, password) {
+  const cleanContact = String(contact || '').trim();
+  const key = sanitizeKey(cleanContact);
+  const cleanPass = String(password || '');
+
+  if (!cleanContact || !cleanPass) {
+    return { ok: false, message: 'กรุณากรอกอีเมล/เบอร์โทรศัพท์ และรหัสผ่าน' };
+  }
+
+  const acc = accountsStore[key];
+  if (!acc || !acc.profile?.passwordHash) {
+    return { ok: false, message: 'ไม่พบบัญชีนี้ในระบบ กรุณาสมัครสมาชิกก่อนเข้าใช้งาน' };
+  }
+
+  if (acc.profile.passwordHash !== hashPassword(cleanPass)) {
+    return { ok: false, message: 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง' };
+  }
+
+  loadAccountIntoWorkspace(key);
+  syncBackendAction('login', { accountKey: key, contact: cleanContact });
+  return { ok: true, message: 'เข้าสู่ระบบสำเร็จ' };
+}
+
+function logoutAccount() {
+  const prevKey = currentAccountKey;
+  persistCurrentAccount();
+  syncBackendAction('logout', { accountKey: prevKey });
+  sessionState = { activeKey: '', loggedIn: false };
+  currentAccountKey = '';
+  saveRaw('somboon_session', sessionState);
+  renderAuthView();
+}
+
+function renderAuthView() {
+  const loggedIn = Boolean(sessionState?.loggedIn && sessionState?.activeKey && accountsStore[sessionState.activeKey]);
+  const topArea = $('topbarAuthArea');
+
+  if (!loggedIn) {
+    $('portalGate').classList.remove('hidden');
+    $('workspaceShell').classList.add('hidden');
+    if (topArea) {
+      topArea.innerHTML = `
+        <span class="usertext">ยังไม่ได้ล็อกอิน</span>
+        <button type="button" class="auth-btn" onclick="openAuthModal('login')">ล็อกอิน</button>
+        <button type="button" class="auth-btn primary" onclick="openAuthModal('register')">สมัครสมาชิก</button>
+        <div class="avatar">?</div>
+      `;
+    }
+    return;
+  }
+
+  const acc = accountsStore[sessionState.activeKey];
+  const displayName = (acc.profile?.name || sessionState.activeKey).trim();
+  const initial = (displayName[0] || 'S').toUpperCase();
+
+  $('portalGate').classList.add('hidden');
+  $('workspaceShell').classList.remove('hidden');
+
+  if (topArea) {
+    topArea.innerHTML = `
+      <span class="usertext">${esc(displayName)}</span>
+      <button type="button" class="auth-btn" onclick="openAuthModal('login')">สลับบัญชี</button>
+      <button type="button" class="auth-btn logout" onclick="logoutAccount()">ออกจากระบบ</button>
+      <div class="avatar">${esc(initial)}</div>
+    `;
+  }
+
+  if ($('dashWelcomeTitle')) $('dashWelcomeTitle').textContent = `หน้าของ ${displayName}`;
+  if ($('dashAccountSub')) {
+    const contactText = acc.profile?.contact ? ` · บัญชี: ${acc.profile.contact}` : '';
+    $('dashAccountSub').textContent = `พื้นที่ส่วนตัวของ ${displayName}${contactText}`;
+  }
+}
+
+let gateMode = 'login';
+function switchGateTab(mode) {
+  gateMode = mode;
+  const isLogin = mode === 'login';
+  $('gateTabLogin').classList.toggle('active', isLogin);
+  $('gateTabRegister').classList.toggle('active', !isLogin);
+  $('gateRegNameField').style.display = isLogin ? 'none' : 'block';
+  $('gateSubmitBtn').textContent = isLogin ? 'เข้าสู่หน้าของบัญชีนี้' : 'สมัครสมาชิกและเปิดหน้าของฉัน';
+  $('gateMsg').textContent = '';
+}
+
+function submitGateForm(e) {
+  e.preventDefault();
+  const contact = $('gateContact').value.trim();
+  const fullName = $('gateFullName').value.trim();
+  const pass = $('gatePass').value;
+
+  const res = gateMode === 'login'
+    ? loginAccount(contact, pass)
+    : registerAccount(fullName, contact, pass);
+
+  if (!res.ok) {
+    $('gateMsg').style.color = '#c64c56';
+    $('gateMsg').textContent = res.message;
+    return;
+  }
+
+  $('gateMsg').style.color = '#16a477';
+  $('gateMsg').textContent = res.message;
+  $('gateForm').reset();
+}
+
+let authMode = 'login';
+function openAuthModal(mode = 'login') {
+  switchAuthTab(mode);
+  $('authMsg').textContent = '';
+  $('authModal').classList.add('open');
+}
+
+function closeAuthModal() {
+  $('authModal').classList.remove('open');
+}
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  const isLogin = mode === 'login';
+  $('tabLogin').classList.toggle('active', isLogin);
+  $('tabRegister').classList.toggle('active', !isLogin);
+  $('regNameField').style.display = isLogin ? 'none' : 'block';
+  $('authSubmitBtn').textContent = isLogin ? 'เข้าสู่หน้าของคนนั้น' : 'สมัครสมาชิกและเข้าใช้งาน';
+  $('authMsg').textContent = '';
+}
+
+function submitAuthForm(e) {
+  e.preventDefault();
+  const contact = $('authUserInput').value.trim();
+  const fullName = $('authFullName').value.trim();
+  const pass = $('authPassInput').value;
+
+  const res = authMode === 'login'
+    ? loginAccount(contact, pass)
+    : registerAccount(fullName, contact, pass);
+
+  if (!res.ok) {
+    $('authMsg').style.color = '#c64c56';
+    $('authMsg').textContent = res.message;
+    return;
+  }
+
+  $('authMsg').style.color = '#16a477';
+  $('authMsg').textContent = res.message;
+  setTimeout(() => {
+    closeAuthModal();
+    $('authForm').reset();
+  }, 200);
+}
+
+const today=new Date().toISOString().slice(0,10);
+if($('today')) $('today').textContent=new Date().toLocaleDateString('th-TH',{dateStyle:'long'});
+if($('year')) $('year').textContent=new Date().getFullYear();
+if($('pDate')) $('pDate').value=today;
+
+const PROXY_API_URL = 'http://localhost:3002/api/product';
+const FALLBACK_IMG = "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='160' height='160' rx='12' fill='%2310243a'/%3E%3Ctext x='50%25' y='46%25' dominant-baseline='middle' text-anchor='middle' fill='%2327b5c7' font-family='sans-serif' font-size='15' font-weight='bold'%3ESHAMAN SHOP%3C/text%3E%3Ctext x='50%25' y='62%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-size='12'%3E1688 / TAOBAO%3C/text%3E%3C/svg%3E";
+
+function getYuanRate() {
+  const r = parseFloat(rates.yuan);
+  return (r && r > 0) ? r : 5.30;
+}
+
+function extractUrlFromText(raw) {
+  const text = (raw || '').trim();
+  if (!text) return '';
+  const match = text.match(/https?:\/\/[^\s"'<>]+/i);
+  let candidate = match ? match[0] : text;
+  candidate = candidate.replace(/[)\],;]+$/, '');
+  if (!/^https?:\/\//i.test(candidate)) {
+    if (/^(detail\.1688\.com|m\.1688\.com|item\.taobao\.com|detail\.tmall\.com|world\.taobao\.com|s\.1688\.com)/i.test(candidate)) {
+      candidate = 'https://' + candidate;
+    } else {
+      return '';
+    }
+  }
+  try {
+    const u = new URL(candidate);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? u.toString() : '';
+  } catch {
+    return '';
+  }
+}
+
+function parseChinaProductLink(urlStr) {
+  let platform = '1688 / Taobao';
+  let itemId = '';
+  try {
+    const u = new URL(urlStr);
+    const host = u.hostname.toLowerCase();
+
+    if (host.includes('1688.com')) {
+      platform = '1688';
+      const offerMatch = u.pathname.match(/\/offer\/(\d+)\.html/i) || urlStr.match(/offerId=(\d+)/i) || urlStr.match(/(\d{8,})/);
+      if (offerMatch) itemId = offerMatch[1];
+    } else if (host.includes('tmall.com')) {
+      platform = 'Tmall';
+      itemId = u.searchParams.get('id') || u.searchParams.get('itemId') || (urlStr.match(/(\d{8,})/)?.[1] || '');
+    } else if (host.includes('taobao.com')) {
+      platform = 'Taobao';
+      itemId = u.searchParams.get('id') || u.searchParams.get('itemId') || (urlStr.match(/(\d{8,})/)?.[1] || '');
+    } else {
+      itemId = u.searchParams.get('id') || u.searchParams.get('offerId') || (urlStr.match(/(\d{8,})/)?.[1] || '');
+    }
+  } catch {}
+  return { platform, itemId };
+}
+
+function setFetchStatus(msg, isWarn = false) {
+  const box = $('fetchStatusBox');
+  if (!box) return;
+  box.style.display = 'inline-block';
+  box.style.background = isWarn ? '#fff4e5' : '#e8f8f1';
+  box.style.color = isWarn ? '#9a5b13' : '#14835f';
+  box.textContent = msg;
+}
+
+function openQuickLink(shouldOpenTab = false) {
+  const inputEl = $('quickUrl');
+  const raw = inputEl.value.trim();
+  if (!raw) {
+    alert('กรุณาวางลิงก์สินค้า 1688 หรือ Taobao ก่อน');
+    inputEl.focus();
+    return;
+  }
+  const validUrl = extractUrlFromText(raw);
+  if (!validUrl) {
+    alert('รูปแบบลิงก์ไม่ถูกต้อง กรุณาวางลิงก์ 1688 / Taobao / Tmall');
+    inputEl.focus();
+    return;
+  }
+
+  inputEl.value = validUrl;
+  $('pUrlInput').value = validUrl;
+  if (shouldOpenTab) {
+    window.open(validUrl, '_blank', 'noopener,noreferrer');
+  }
+  showPage('scraper');
+  fetchProductData();
+}
+
+function openCurrentProductUrl() {
+  const validUrl = extractUrlFromText($('pUrlInput').value);
+  if (!validUrl) {
+    alert('ยังไม่มีลิงก์สินค้าที่ถูกต้อง');
+    return;
+  }
+  window.open(validUrl, '_blank', 'noopener,noreferrer');
+}
+
+function applyCustomImg() {
+  const customImg = ($('pImgUrlInput').value || '').trim();
+  $('productImg').src = customImg || (currentProductData?.img || FALLBACK_IMG);
+  if (currentProductData) {
+    currentProductData.img = customImg || FALLBACK_IMG;
+  }
+}
+
+const RAPIDAPI_KEY = '306350776cmsh2b9f44d6add00fdp1c7808jsn04a95569ee1d';
+
+function normalizeRapidApiProduct(raw, parsed, validUrl, fxRate) {
+  if (!raw || typeof raw !== 'object') return null;
+  const data = raw.data || raw.result || raw.item || raw.product || raw;
+
+  const title = String(
+    data.title || data.subject || data.name || data.itemTitle || data.productTitle || ''
+  ).trim();
+
+  const shop = String(
+    data.shopName || data.sellerName || data.companyName || data.shop?.name || data.seller?.name || ''
+  ).trim();
+
+  let img = String(
+    data.picUrl || data.image || data.img || data.mainImage || data.thumb ||
+    (Array.isArray(data.images) ? data.images[0] : '') ||
+    (Array.isArray(data.pics) ? data.pics[0] : '') || ''
+  ).trim();
+  if (img.startsWith('//')) img = 'https:' + img;
+
+  const rawSkuList =
+    data.skus || data.skuList || data.variants || data.priceRange || data.specs || [];
+
+  let variants = [];
+  if (Array.isArray(rawSkuList) && rawSkuList.length > 0) {
+    variants = rawSkuList.map((item, idx) => {
+      const specName = String(
+        item.spec || item.name || item.skuName || item.propsName || item.title || `ตัวเลือกที่ ${idx + 1}`
+      ).trim();
+      const rawYuan = parseFloat(
+        item.priceYuan ?? item.price ?? item.salePrice ?? item.promotionPrice ?? item.yuan ?? 0
+      );
+      const y = Number.isFinite(rawYuan) && rawYuan > 0 ? +rawYuan.toFixed(2) : 0;
+      const b = +(y * fxRate).toFixed(2);
+      return { spec: specName, priceYuan: y, priceBaht: b };
+    });
+  } else {
+    const singleYuan = parseFloat(data.priceYuan ?? data.price ?? data.minPrice ?? 0);
+    const y = Number.isFinite(singleYuan) && singleYuan > 0 ? +singleYuan.toFixed(2) : 0;
+    variants = [
+      { spec: 'ตัวเลือกมาตรฐาน', priceYuan: y, priceBaht: +(y * fxRate).toFixed(2) }
+    ];
+  }
+
+  if (!title && !img && (!variants.length || variants[0].priceYuan <= 0)) {
+    return null;
+  }
+
+  return {
+    title: title || (parsed.itemId ? `สินค้า ${parsed.platform} รหัส ${parsed.itemId}` : 'สินค้าจากลิงก์'),
+    shop,
+    img: img || FALLBACK_IMG,
+    url: validUrl,
+    platform: parsed.platform,
+    itemId: parsed.itemId,
+    variants
+  };
+}
+
+async function tryFetchFromRapidApi(validUrl, parsed, fxRate) {
+  if (!RAPIDAPI_KEY) return null;
+
+  const candidateUrls = [
+    `https://1688-datahub.p.rapidapi.com/item_detail?itemId=${encodeURIComponent(parsed.itemId || '')}&url=${encodeURIComponent(validUrl)}`,
+    `https://1688-datahub.p.rapidapi.com/item_detail_v2?itemId=${encodeURIComponent(parsed.itemId || '')}&url=${encodeURIComponent(validUrl)}`
+  ];
+
+  for (const apiUrl of candidateUrls) {
+    try {
+      const u = new URL(apiUrl);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 7000);
+      const res = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': RAPIDAPI_KEY,
+          'x-rapidapi-host': u.hostname
+        },
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if (!res.ok) continue;
+      const json = await res.json();
+      const normalized = normalizeRapidApiProduct(json, parsed, validUrl, fxRate);
+      if (normalized) return normalized;
+    } catch {}
+  }
+
+  return null;
+}
+
+async function tryFetchFromServer(validUrl) {
+  const endpoints = [
+    `${PROXY_API_URL}?url=${encodeURIComponent(validUrl)}`,
+    `/api/product?url=${encodeURIComponent(validUrl)}`
+  ];
+  for (const ep of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 4500);
+      const res = await fetch(ep, { signal: controller.signal });
+      clearTimeout(timer);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && (json.product || json.title)) {
+          return json.product || json;
+        }
+      }
+    } catch {}
+  }
+  return null;
+}
+
+async function tryFetchPublicMeta(validUrl) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 5000);
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(validUrl)}`;
+    const res = await fetch(proxyUrl, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!res.ok) return null;
+    const html = await res.text();
+    if (!html || html.length < 100) return null;
+
+    const titleMatch =
+      html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["']/i) ||
+      html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const imgMatch =
+      html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+
+    let cleanTitle = titleMatch ? titleMatch[1].replace(/\s+/g, ' ').trim() : '';
+    if (/验证码|login|登录|安全验证|1688\.com-$/i.test(cleanTitle)) {
+      cleanTitle = '';
+    }
+    let cleanImg = imgMatch ? imgMatch[1].trim() : '';
+    if (cleanImg.startsWith('//')) cleanImg = 'https:' + cleanImg;
+
+    if (!cleanTitle && !cleanImg) return null;
+    return {
+      title: cleanTitle,
+      img: cleanImg
+    };
+  } catch {
+    return null;
+  }
+}
+
+let variantQtys = [], currentProductData = null;
+
+async function fetchProductData() {
+  const rawUrl = $('pUrlInput').value.trim();
+  if (!rawUrl) {
+    alert('กรุณาวาง URL สินค้าจาก 1688 หรือ Taobao');
+    $('pUrlInput').focus();
+    return;
+  }
+  const validUrl = extractUrlFromText(rawUrl);
+  if (!validUrl) {
+    alert('รูปแบบ URL ไม่ถูกต้อง');
+    $('pUrlInput').focus();
+    return;
+  }
+
+  $('pUrlInput').value = validUrl;
+  $('quickUrl').value = validUrl;
+
+  const btn = $('btnFetchProd');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ กำลังดึงข้อมูล...';
+  }
+
+  const parsed = parseChinaProductLink(validUrl);
+  $('pMetaInput').value = `${parsed.platform}${parsed.itemId ? ' | ID: ' + parsed.itemId : ''}`;
+
+  const fxRate = getYuanRate();
+  let p = await tryFetchFromServer(validUrl);
+  let sourceLabel = 'ดึงข้อมูลจากเซิร์ฟเวอร์สำเร็จ';
+
+  if (!p) {
+    const rapidProduct = await tryFetchFromRapidApi(validUrl, parsed, fxRate);
+    if (rapidProduct) {
+      p = rapidProduct;
+      sourceLabel = 'ดึงข้อมูลผ่าน RapidAPI สำเร็จ';
+    }
+  }
+
+  if (!p) {
+    const meta = await tryFetchPublicMeta(validUrl);
+    if (meta && (meta.title || meta.img)) {
+      p = meta;
+      sourceLabel = 'ดึงข้อมูลเบื้องต้นสำเร็จ (สามารถแก้ชื่อ/รูป/เพิ่มราคาต่อได้)';
+    } else {
+      sourceLabel = 'ลิงก์ถูกป้องกันการดึงตรง — เตรียมฟอร์มพร้อมให้กรอกราคาและสั่งซื้อได้ทันที';
+    }
+  }
+
+  const shopInputVal = $('pShopInput').value.trim();
+  const defaultTitle = parsed.itemId
+    ? `สินค้า ${parsed.platform} รหัส ${parsed.itemId}`
+    : `สินค้าจากลิงก์ ${parsed.platform}`;
+
+  const rawVariants = Array.isArray(p?.variants) && p.variants.length
+    ? p.variants
+    : [
+        { spec: 'ตัวเลือกที่ 1', priceYuan: 0, priceBaht: 0 },
+        { spec: 'ตัวเลือกที่ 2', priceYuan: 0, priceBaht: 0 }
+      ];
+
+  const normalizedVariants = rawVariants.map((v, idx) => {
+    const y = Math.max(0, parseFloat(v.priceYuan) || 0);
+    const b = (v.priceBaht !== undefined && v.priceBaht !== null && parseFloat(v.priceBaht) > 0)
+      ? Math.max(0, parseFloat(v.priceBaht) || 0)
+      : +(y * fxRate).toFixed(2);
+    return {
+      spec: v.spec || `ตัวเลือกที่ ${idx + 1}`,
+      priceYuan: y,
+      priceBaht: b
+    };
+  });
+
+  currentProductData = {
+    title: (p?.title || defaultTitle).trim(),
+    shop: shopInputVal || (p?.shop || '').trim(),
+    img: (p?.img || FALLBACK_IMG).trim(),
+    url: validUrl,
+    platform: parsed.platform,
+    itemId: parsed.itemId,
+    variants: normalizedVariants
+  };
+
+  variantQtys = new Array(currentProductData.variants.length).fill(0);
+
+  $('pTitle').innerHTML = `
+    <input id="editTitleInput" type="text" value="${esc(currentProductData.title)}"
+      oninput="currentProductData.title=this.value"
+      placeholder="กรอกหรือแก้ไขชื่อสินค้า"
+      style="width:100%;max-width:560px;border:1px solid #dce4ed;border-radius:8px;padding:8px 10px;font-weight:bold;color:#152c43;">
+  `;
+  $('pShopInput').value = currentProductData.shop;
+  $('pImgUrlInput').value = currentProductData.img.startsWith('data:') ? '' : currentProductData.img;
+  $('pDisplayUrl').innerHTML = `<a href="${esc(validUrl)}" target="_blank" rel="noopener noreferrer" style="color:var(--blue);text-decoration:underline;">${esc(validUrl)}</a>`;
+  $('productImg').src = currentProductData.img;
+  $('productImg').onerror = () => { $('productImg').src = FALLBACK_IMG; };
+
+  setFetchStatus(`${sourceLabel} (เรทปัจจุบัน: ฿${fxRate.toFixed(2)} / ¥)`, !p);
+  renderVariants();
+  $('cartActionBox').style.display = 'block';
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = '🔍 ดึงข้อมูลสินค้า';
+  }
+}
+
+function addVariantRow() {
+  if (!currentProductData) return;
+  currentProductData.variants.push({
+    spec: `ตัวเลือกที่ ${currentProductData.variants.length + 1}`,
+    priceYuan: 0,
+    priceBaht: 0
+  });
+  variantQtys.push(0);
+  renderVariants();
+}
+
+function removeVariantRow(index) {
+  if (!currentProductData || currentProductData.variants.length <= 1) {
+    alert('ต้องมีตัวเลือกสินค้าอย่างน้อย 1 รายการ');
+    return;
+  }
+  currentProductData.variants.splice(index, 1);
+  variantQtys.splice(index, 1);
+  renderVariants();
+}
+
+function updateVariantField(index, field, value) {
+  if (!currentProductData || !currentProductData.variants[index]) return;
+  const v = currentProductData.variants[index];
+  const fxRate = getYuanRate();
+
+  if (field === 'spec') {
+    v.spec = value;
+  } else if (field === 'priceYuan') {
+    v.priceYuan = Math.max(0, parseFloat(value) || 0);
+    v.priceBaht = +(v.priceYuan * fxRate).toFixed(2);
+  } else if (field === 'priceBaht') {
+    v.priceBaht = Math.max(0, parseFloat(value) || 0);
+  }
+
+  const qty = variantQtys[index] || 0;
+  const sumY = (Number(v.priceYuan) || 0) * qty;
+  const sumB = (Number(v.priceBaht) || 0) * qty;
+
+  const bahtInput = document.getElementById(`bahtInput_${index}`);
+  if (bahtInput && field === 'priceYuan') {
+    bahtInput.value = Number(v.priceBaht).toFixed(2);
+  }
+  const sumYEl = document.getElementById(`sumY_${index}`);
+  const sumBEl = document.getElementById(`sumB_${index}`);
+  if (sumYEl) sumYEl.textContent = sumY.toFixed(2);
+  if (sumBEl) sumBEl.textContent = sumB.toFixed(2);
+
+  calculateTotalSummary();
+}
+
+function renderVariants() {
+  if (!currentProductData) return;
+  let html = `
+    <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <strong style="font-size:14px;color:var(--navy);">ตารางสเปคและราคาสินค้า</strong>
+      <button type="button" class="btn secondary" onclick="addVariantRow()">+ เพิ่มตัวเลือกสเปค</button>
+    </div>
+    <table><thead><tr>
+      <th>สเปค / ขนาด</th>
+      <th>ราคา (¥)</th>
+      <th>ราคา (฿)</th>
+      <th style="text-align:center;">จำนวน</th>
+      <th>รวม (¥)</th>
+      <th>รวม (฿)</th>
+      <th></th>
+    </tr></thead><tbody>
+  `;
+
+  currentProductData.variants.forEach((v, i) => {
+    const qty = variantQtys[i] || 0;
+    const sumY = (Number(v.priceYuan) || 0) * qty;
+    const sumB = (Number(v.priceBaht) || 0) * qty;
+    html += `
+      <tr>
+        <td><input type="text" value="${esc(v.spec)}" oninput="updateVariantField(${i},'spec',this.value)" style="width:180px;border:1px solid #dce4ed;border-radius:6px;padding:6px 8px;"></td>
+        <td><input type="number" min="0" step="0.01" value="${Number(v.priceYuan) || 0}" oninput="updateVariantField(${i},'priceYuan',this.value)" style="width:90px;border:1px solid #dce4ed;border-radius:6px;padding:6px 8px;"></td>
+        <td><input id="bahtInput_${i}" type="number" min="0" step="0.01" value="${Number(v.priceBaht) || 0}" oninput="updateVariantField(${i},'priceBaht',this.value)" style="width:95px;border:1px solid #dce4ed;border-radius:6px;padding:6px 8px;"></td>
+        <td style="text-align:center;">
+          <button type="button" onclick="updateQty(${i},-1)" style="padding:2px 8px;">-</button>
+          <span id="qty_${i}" style="margin:0 8px;font-weight:bold;">${qty}</span>
+          <button type="button" onclick="updateQty(${i},1)" style="padding:2px 8px;">+</button>
+        </td>
+        <td id="sumY_${i}">${sumY.toFixed(2)}</td>
+        <td id="sumB_${i}">${sumB.toFixed(2)}</td>
+        <td><button type="button" class="btn danger" style="padding:5px 10px;font-size:12px;" onclick="removeVariantRow(${i})">ลบ</button></td>
+      </tr>
+    `;
+  });
+
+  html += '</tbody></table>';
+  $('variantsArea').innerHTML = html;
+  calculateTotalSummary();
+}
+
+function updateQty(index, change) {
+  variantQtys[index] = Math.max(0, (variantQtys[index] || 0) + change);
+  $(`qty_${index}`).textContent = variantQtys[index];
+  const v = currentProductData.variants[index];
+  $(`sumY_${index}`).textContent = ((Number(v.priceYuan) || 0) * variantQtys[index]).toFixed(2);
+  $(`sumB_${index}`).textContent = ((Number(v.priceBaht) || 0) * variantQtys[index]).toFixed(2);
+  calculateTotalSummary();
+}
+
+function calculateTotalSummary() {
+  if (!currentProductData) return;
+  let totalQ = 0, totalY = 0, totalB = 0;
+  variantQtys.forEach((q, i) => {
+    const v = currentProductData.variants[i];
+    totalQ += q;
+    totalY += q * (Number(v.priceYuan) || 0);
+    totalB += q * (Number(v.priceBaht) || 0);
+  });
+  $('totalQty').textContent = totalQ;
+  $('totalYuan').textContent = totalY.toFixed(2);
+  $('totalBaht').textContent = totalB.toFixed(2);
+}
+
+function addToCartFromScraper() {
+  if (!currentProductData) return;
+  const totalQ = variantQtys.reduce((a, b) => a + b, 0);
+  if (totalQ <= 0) {
+    alert('กรุณาเลือกจำนวนสินค้าอย่างน้อย 1 ชิ้น');
+    return;
+  }
+  const totalB = variantQtys.reduce((sum, q, i) => sum + (q * (Number(currentProductData.variants[i].priceBaht) || 0)), 0);
+  const pickedSpecs = currentProductData.variants
+    .map((v, i) => variantQtys[i] > 0 ? `${v.spec} x${variantQtys[i]}` : null)
+    .filter(Boolean)
+    .join(', ');
+
+  const orderId = 'SO-' + Math.floor(1000 + Math.random() * 9000);
+  const titleText = (currentProductData.title || 'สินค้าจากลิงก์').trim();
+  const shopText = ($('pShopInput').value || '').trim();
+  const displayName = `${titleText}${shopText ? ' [' + shopText + ']' : ''} — ${pickedSpecs} (รวม ${totalQ} ชิ้น)`;
+
+  const newOrder = {
+    id: orderId,
+    name: displayName,
+    type: 'Pre-order',
+    amount: totalB,
+    status: 'รอชำระเงิน',
+    date: today,
+    url: currentProductData.url
+  };
+  orders.unshift(newOrder);
+  persistCurrentAccount();
+  syncBackendAction('create_order', newOrder);
+  alert('เพิ่มสินค้าลงในรายการสั่งซื้อเรียบร้อยแล้ว!');
+  showPage('orders');
+  render();
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='calculator') calculateCost();
+}
+document.querySelectorAll('.navbtn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+
+function money(n){return Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function badge(s){return `<span class="pill ${s==='เสร็จสิ้น'||s==='ถึงประเทศไทย'||s==='สำเร็จ'||s==='ชำระแล้ว'?'green':s.includes('รอ')||s.includes('เตรียม')?'orange':''}">${esc(s)}</span>`}
+
+function getCurrentBalance(){
+  return payments.reduce((s,p)=>{
+    const amt = Number(p.amount) || 0;
+    return s + (p.type==='in' ? amt : -amt);
+  }, 0);
+}
+
+function renderOrderStatusCell(order){
+  const status = String(order?.status || '').trim();
+  const id = String(order?.id || '').trim();
+  if(status === 'รอชำระเงิน'){
+    const busy = payingOrderIds.has(id);
+    return `${badge(status)} <button type="button" class="btn green js-pay-order-btn" data-order-id="${esc(id)}" ${busy?'disabled':''} style="padding:4px 10px;font-size:12px;margin-left:6px;">${busy?'กำลังชำระ...':'ชำระเงิน'}</button>`;
+  }
+  return badge(status);
+}
+
+async function payOrderById(orderId){
+  const cleanId = String(orderId || '').trim();
+  if(!cleanId || payingOrderIds.has(cleanId)) return;
+
+  const index = orders.findIndex(o => String(o?.id || '').trim() === cleanId);
+  if(index === -1){
+    alert('ไม่พบรายการสั่งซื้อที่ต้องการชำระ');
+    return;
+  }
+
+  const order = orders[index];
+  const status = String(order?.status || '').trim();
+  if(status !== 'รอชำระเงิน'){
+    alert(`รายการนี้มีสถานะ "${status}" ไม่สามารถชำระซ้ำได้`);
+    return;
+  }
+
+  const amount = Number(order.amount) || 0;
+  if(amount <= 0){
+    alert('ยอดชำระไม่ถูกต้อง (ต้องมากกว่า 0 บาท)');
+    return;
+  }
+
+  const bal = getCurrentBalance();
+  if(amount > bal){
+    alert(`ยอดเงินคงเหลือไม่เพียงพอ (คงเหลือ ฿${money(bal)} / ยอดชำระ ฿${money(amount)})`);
+    return;
+  }
+
+  if(!confirm(`ยืนยันชำระสินค้าเลขที่ ${order.id} ยอด ฿${money(amount)} โดยหักจากยอดเงินคงเหลือใช่หรือไม่?`)) return;
+
+  payingOrderIds.add(cleanId);
+  render();
+
+  const prevStatus = order.status;
+  const prevPayments = [...payments];
+  const newPayment = {
+    type: 'out',
+    amount,
+    note: `ชำระสินค้า ${order.id}`,
+    date: new Date().toLocaleString('th-TH')
+  };
+
+  try {
+    order.status = 'ชำระแล้ว';
+    payments.unshift(newPayment);
+
+    const payRes = await syncBackendAction('pay_order', {
+      orderId: order.id,
+      amount,
+      status: 'ชำระแล้ว',
+      order,
+      payment: newPayment
+    });
+
+    if(!payRes.offline && !payRes.ok){
+      order.status = prevStatus;
+      payments = prevPayments;
+      render();
+      alert(payRes.message || 'บันทึกการชำระเงินกับเซิร์ฟเวอร์ไม่สำเร็จ');
+      return;
+    }
+
+    await syncBackendAction('create_payment', newPayment);
+    persistCurrentAccount(true);
+    render();
+    alert('ชำระสินค้าเรียบร้อยแล้ว');
+  } catch (err) {
+    order.status = prevStatus;
+    payments = prevPayments;
+    render();
+    alert('เกิดข้อผิดพลาดระหว่างดำเนินการชำระเงิน');
+  } finally {
+    payingOrderIds.delete(cleanId);
+    render();
+  }
+}
+
+function payOrderFromBalance(orderId){
+  return payOrderById(orderId);
+}
+
+function payPendingOrder(orderId){
+  return payOrderById(orderId);
+}
+
+function bindOrderTableEvents(){
+  const ordersBody = $('ordersTable');
+  if(ordersBody && ordersBody.dataset.bound !== '1'){
+    ordersBody.dataset.bound = '1';
+    ordersBody.addEventListener('click', (e) => {
+      const payBtn = e.target.closest('.js-pay-order-btn');
+      if(payBtn){
+        const id = payBtn.getAttribute('data-order-id');
+        if(id) payOrderById(id);
+        return;
+      }
+      const delBtn = e.target.closest('.js-del-order-btn');
+      if(delBtn){
+        const id = delBtn.getAttribute('data-order-id');
+        const idx = orders.findIndex(o => String(o?.id || '').trim() === String(id || '').trim());
+        if(idx !== -1) delItem('orders', idx);
+      }
+    });
+  }
+
+  const pendingBody = $('pendingOrdersTable');
+  if(pendingBody && pendingBody.dataset.bound !== '1'){
+    pendingBody.dataset.bound = '1';
+    pendingBody.addEventListener('click', (e) => {
+      const payBtn = e.target.closest('.js-pay-order-btn');
+      if(!payBtn) return;
+      const id = payBtn.getAttribute('data-order-id');
+      if(id) payOrderById(id);
+    });
+  }
+}
+
+function addParcel(){
+  let track=$('pTrack').value.trim();
+  if(!track){alert('กรุณากรอกเลขพัสดุ');return;}
+  const newParcel={track,lot:$('pLot').value,name:$('pNameInput').value,weight:$('pWeight').value,status:$('pStatus').value,date:$('pDate').value};
+  parcels.unshift(newParcel);
+  persistCurrentAccount();
+  syncBackendAction('create_parcel', newParcel);
+  ['pTrack','pLot','pNameInput','pWeight'].forEach(x=>{if($(x)) $(x).value=''});
+  render();
+}
+
+function addDelivery(){
+  let id=$('dId').value.trim();
+  if(!id){alert('กรุณากรอกเลขที่จัดส่ง');return;}
+  const newDelivery={id,receiver:$('dReceiver').value,track:$('dTrack').value,company:$('dCompany').value,fee:+$('dFee').value||0,status:$('dStatus').value};
+  deliveries.unshift(newDelivery);
+  persistCurrentAccount();
+  syncBackendAction('create_delivery', newDelivery);
+  ['dId','dReceiver','dTrack','dCompany','dFee'].forEach(x=>{if($(x)) $(x).value=''});
+  render();
+}
+
+function addPayment(){
+  let amount=+$('payAmount').value;
+  if(amount<=0){alert('กรุณากรอกจำนวนเงิน');return;}
+  const newPayment={type:$('payType').value,amount,note:$('payNote').value,date:new Date().toLocaleString('th-TH')};
+  payments.unshift(newPayment);
+  persistCurrentAccount();
+  syncBackendAction('create_payment', newPayment);
+  $('payAmount').value='';$('payNote').value='';render();
+}
+
+function delItem(type,index){
+  let itemName=type==='orders'?'รายการสั่งซื้อนี้':(type==='parcels'?'พัสดุนี้':'รายการจัดส่งนี้');
+  if(!confirm('ต้องการลบ'+itemName+'ใช่หรือไม่?')) return;
+  let removed = null;
+  if(type==='orders'){removed=orders.splice(index,1)[0];}
+  else if(type==='parcels'){removed=parcels.splice(index,1)[0];}
+  else if(type==='deliveries'){removed=deliveries.splice(index,1)[0];}
+  persistCurrentAccount();
+  syncBackendAction('delete_item', { type, index, item: removed });
+  render();
+}
+
+function render(){
+  if($('ordersTable')) $('ordersTable').innerHTML=orders.map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.name)}</td><td>${esc(o.type)}</td><td>${money(o.amount)}</td><td>${renderOrderStatusCell(o)}</td><td>${esc(o.date)}</td><td><button type="button" class="btn danger js-del-order-btn" data-order-id="${esc(o.id)}">ลบ</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">ยังไม่มีรายการสั่งซื้อ</td></tr>';
+  if($('parcelsTable')) $('parcelsTable').innerHTML=parcels.map((p,i)=>`<tr><td>${esc(p.track)}</td><td>${esc(p.lot)}</td><td>${esc(p.name)}</td><td>${esc(p.weight)} กก.</td><td>${badge(p.status)}</td><td>${esc(p.date)}</td><td><button class="btn danger" onclick="delItem('parcels',${i})">ลบ</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">ยังไม่มีพัสดุ</td></tr>';
+  if($('deliveriesTable')) $('deliveriesTable').innerHTML=deliveries.map((d,i)=>`<tr><td>${esc(d.id)}</td><td>${esc(d.receiver)}</td><td>${esc(d.track)}</td><td>${esc(d.company)}</td><td>${money(d.fee)}</td><td>${badge(d.status)}</td><td><button class="btn danger" onclick="delItem('deliveries',${i})">ลบ</button></td></tr>`).join('')||'<tr><td colspan="7" class="empty">ยังไม่มีรายการจัดส่ง</td></tr>';
+
+  const pendingOrders=orders.filter(o=>String(o.status||'').trim()==='รอชำระเงิน');
+  if($('pendingOrderCount')) $('pendingOrderCount').textContent=pendingOrders.length+' รายการ';
+  if($('pendingOrdersTable')) $('pendingOrdersTable').innerHTML=pendingOrders.map(o=>{
+    const id=String(o?.id||'').trim();
+    const busy=payingOrderIds.has(id);
+    return `<tr><td>${esc(id)}</td><td>${esc(o.name)}</td><td>${money(o.amount)}</td><td>${badge(o.status)}</td><td><button type="button" class="btn green js-pay-order-btn" data-order-id="${esc(id)}" ${busy?'disabled':''}>${busy?'กำลังชำระ...':'ชำระสินค้า'}</button></td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">ไม่มีรายการสินค้าที่รอชำระเงิน</td></tr>';
+
+  bindOrderTableEvents();
+
+  let bal=getCurrentBalance();
+  if($('balanceStat')) $('balanceStat').textContent=money(bal);
+  if($('balanceBig')) $('balanceBig').textContent='฿'+money(bal);
+  if($('orderStat')) $('orderStat').textContent=orders.length;
+  if($('parcelStat')) $('parcelStat').textContent=parcels.length;
+  if($('deliveryStat')) $('deliveryStat').textContent=deliveries.length;
+  if($('paymentCount')) $('paymentCount').textContent=payments.length;
+  if($('orderCount')) $('orderCount').textContent=orders.length+' รายการ';
+  if($('parcelCount')) $('parcelCount').textContent=parcels.length+' รายการ';
+  if($('dashOrders')) $('dashOrders').innerHTML=orders.slice(0,5).map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.name)}</td><td>${money(o.amount)}</td><td>${badge(o.status)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">ยังไม่มีข้อมูล</td></tr>';
+  if($('dashParcels')) $('dashParcels').innerHTML=parcels.slice(0,5).map(p=>`<tr><td>${esc(p.track)}</td><td>${esc(p.lot)}</td><td>${badge(p.status)}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">ยังไม่มีข้อมูล</td></tr>';
+
+  let run=bal;
+  if($('paymentsTable')) $('paymentsTable').innerHTML=payments.map(p=>{
+    const amt=Number(p.amount)||0;
+    const rowBal=run;
+    run+=(p.type==='in'?-amt:amt);
+    return `<tr><td>${esc(p.date)}</td><td>${esc(p.note)}</td><td style="color:#14835f">${p.type==='in'?money(amt):'-'}</td><td style="color:#c64c56">${p.type==='out'?money(amt):'-'}</td><td>${money(rowBal)}</td></tr>`;
+  }).join('')||'<tr><td colspan="5" class="empty">ยังไม่มีรายการเดินบัญชี</td></tr>';
+}
+
+function calcVolume(){
+  let x=+$('dimX').value||0,y=+$('dimY').value||0,z=+$('dimZ').value||0;
+  if($('volume')) $('volume').value=(x*y*z/1000000).toFixed(4);
+  calculateCost();
+}
+
+function calculateCost(){
+  let cbm=+$('volume').value||0,w=+$('dimW').value||0,mode=$('cTransport').value;
+  let cbmRate=Number(mode==='truck'?rates.truck:rates.ship)||0;
+  let kgRate=Number(rates.kg)||0;
+  let min=Number(rates.min)||0;
+  let cbmCost=cbm>0&&cbmRate>0?cbm*cbmRate:0;
+  let kgCost=w>0&&kgRate>0?w*kgRate:0;
+
+  if(cbm<=0&&w<=0){
+    if($('billBy')) $('billBy').value='-';
+    if($('costResult')) $('costResult').textContent=(cbmRate>0||kgRate>0)?'กรอกขนาดหรือน้ำหนักสินค้า':'กรุณาตั้งเรทค่าขนส่ง';
+    if($('costDetail')) $('costDetail').textContent='ยังไม่มีข้อมูลขนาดหรือน้ำหนัก';
+    return;
+  }
+
+  let useKg=kgCost>cbmCost||(cbmRate<=0&&kgRate>0);
+  if(cbmRate<=0&&kgRate<=0){
+    if($('billBy')) $('billBy').value='-';
+    if($('costResult')) $('costResult').textContent='กรุณาตั้งเรทค่าขนส่ง';
+    if($('costDetail')) $('costDetail').textContent='กรุณาตั้งค่าเรทในหน้าตั้งค่าก่อน';
+    return;
+  }
+
+  let rawCost=useKg?kgCost:cbmCost;
+  let finalCost=Math.max(rawCost,min);
+  if($('billBy')) $('billBy').value=useKg?'น้ำหนัก (กก.)':'ปริมาตร (CBM)';
+  if($('costResult')) $('costResult').textContent='฿'+money(finalCost);
+  if($('costDetail')) $('costDetail').textContent=useKg
+    ?`${w.toFixed(2)} กก. × ฿${money(kgRate)} / กก.${min>0&&rawCost<min?' (คิดค่าขั้นต่ำ ฿'+money(min)+')':''}`
+    :`${cbm.toFixed(4)} CBM × ฿${money(cbmRate)} / CBM${min>0&&rawCost<min?' (คิดค่าขั้นต่ำ ฿'+money(min)+')':''}`;
+}
+
+function saveRates(){
+  rates={
+    yuan:$('rateYuan')?.value || '5.30',
+    truck:$('rateTruck').value,
+    ship:$('rateShip').value,
+    kg:$('rateKg').value,
+    min:$('minFee').value
+  };
+  persistCurrentAccount();
+  syncBackendAction('save_rates', rates);
+  if (currentProductData) {
+    const fxRate = getYuanRate();
+    currentProductData.variants.forEach(v => {
+      v.priceBaht = +((Number(v.priceYuan) || 0) * fxRate).toFixed(2);
+    });
+    renderVariants();
+  }
+  calculateCost();
+  alert('บันทึกเรทเรียบร้อยแล้ว');
+}
+
+function exportData(){
+  const data={account:currentAccountKey,orders,parcels,deliveries,payments,rates};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  const url=URL.createObjectURL(blob);
+  a.href=url;a.download=`somboon-express-${currentAccountKey || 'backup'}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function clearData(){
+  if(!confirm('ยืนยันล้างข้อมูลของบัญชีนี้ทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
+  orders=[];parcels=[];deliveries=[];payments=[];rates={yuan:'5.30',truck:'',ship:'',kg:'',min:''};
+  persistCurrentAccount();
+  syncBackendAction('clear_data', { accountKey: currentAccountKey });
+  syncRateInputs();
+  render();calculateCost();alert('ล้างข้อมูลเรียบร้อย');
+}
+
+function syncRateInputs() {
+  if($('rateYuan')) $('rateYuan').value=rates.yuan||'5.30';
+  if($('rateTruck')) $('rateTruck').value=rates.truck||'';
+  if($('rateShip')) $('rateShip').value=rates.ship||'';
+  if($('rateKg')) $('rateKg').value=rates.kg||'';
+  if($('minFee')) $('minFee').value=rates.min||'';
+}
+
+if (sessionState?.loggedIn && sessionState?.activeKey && accountsStore[sessionState.activeKey]) {
+  loadAccountIntoWorkspace(sessionState.activeKey);
+} else {
+  sessionState = { activeKey: '', loggedIn: false };
+  saveRaw('somboon_session', sessionState);
+  renderAuthView();
+}
+</script>
+</body>
+</html>
