@@ -153,7 +153,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 <div class="product-card">
 <div class="product-flex">
 <div>
-<img id="productImg" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='160' height='160' fill='%23eef2f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23718096' font-family='sans-serif' font-size='13'%3ENo Image%3C/text%3E%3C/svg%3E" alt="รูปสินค้า" class="product-img">
+<img id="productImg" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Crect width='160' height='160' rx='12' fill='%2310243a'/%3E%3Ctext x='50%25' y='46%25' dominant-baseline='middle' text-anchor='middle' fill='%2327b5c7' font-family='sans-serif' font-size='15' font-weight='bold'%3ESHAMAN SHOP%3C/text%3E%3Ctext x='50%25' y='62%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-size='12'%3E1688 / TAOBAO%3C/text%3E%3C/svg%3E" alt="รูปสินค้า" class="product-img">
 </div>
 <div style="flex:1;min-width:250px;">
 <div id="pTitle" style="font-size:18px;margin-top:0;color:var(--navy)">กรุณาวางลิงก์ 1688 / Taobao แล้วกดดึงข้อมูลสินค้า</div>
@@ -225,6 +225,191 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 <div class="field"><label>รายละเอียด</label><input id="payNote" placeholder="เช่น เติมเงินค่าสินค้า"></div>
 </div><div class="actions"><button class="btn green" onclick="addPayment()">บันทึกรายการเงิน</button></div>
 </div>
+
+<!-- นำไปวางในหน้า "การชำระเงินและบัญชี" ของ เทสsomboon-express-fixed.html -->
+<div id="frontendTopupSection" class="card" style="margin-top:16px;">
+  <h3>เติมเงินเข้าบัญชี (รอแอดมินตรวจสอบสลิปและอนุมัติ)</h3>
+  <div class="field">
+    <label for="topupAmountInput">จำนวนเงิน (บาท)</label>
+    <input id="topupAmountInput" type="number" min="1" max="10000000" step="0.01" placeholder="เช่น 500.00" />
+  </div>
+  <div class="field" style="margin-top:10px;">
+    <label for="topupSlipInput">อัปโหลดรูปสลิปการโอนเงิน (JPG, PNG, WEBP, GIF ไม่เกิน 5MB)</label>
+    <input id="topupSlipInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+  </div>
+  <div id="topupSlipPreviewWrap" style="margin:10px 0;display:none;">
+    <img id="topupSlipPreviewImg" src="" alt="ตัวอย่างสลิปก่อนส่ง" style="max-width:240px;max-height:240px;border-radius:8px;border:1px solid #cbd5e1;" />
+  </div>
+  <div class="actions">
+    <button id="submitTopupRequestBtn" class="btn green" type="button">ส่งคำขอเติมเงิน</button>
+  </div>
+  <div id="topupSubmitFeedback" style="margin-top:8px;font-weight:600;"></div>
+
+  <h4 style="margin-top:18px;">ประวัติคำขอเติมเงินของบัญชีนี้</h4>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>รหัสคำขอ</th>
+          <th>จำนวนเงิน</th>
+          <th>เวลาที่ส่ง</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody id="myTopupHistoryBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+(function () {
+  const MAX_SLIP_BYTES = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  let selectedSlipDataUrl = '';
+  let selectedSlipMeta = { mime: '', size: 0 };
+  let isSubmittingTopup = false;
+
+  // อ่านบัญชีที่กำลังล็อกอินจริงจาก localStorage ของหน้าบ้าน (ไม่ใช้ localStorage เป็นแหล่งอนุมัติยอดเงิน)
+  function getActiveAccountInfo() {
+    try {
+      const session = JSON.parse(localStorage.getItem('somboon_session') || '{}');
+      const accounts = JSON.parse(localStorage.getItem('somboon_accounts') || '{}');
+      const key = String(session?.activeKey || '').trim();
+      const acc = key ? accounts[key] : null;
+      if (!key || !acc) return null;
+      return {
+        accountKey: key,
+        customerName: String(acc?.profile?.name || key).trim()
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function renderMyTopupHistory() {
+    const body = document.getElementById('myTopupHistoryBody');
+    const active = getActiveAccountInfo();
+    if (!body) return;
+    if (!active) {
+      body.innerHTML = '<tr><td colspan="4">กรุณาเข้าสู่ระบบเพื่อดูประวัติคำขอเติมเงินของบัญชีตนเอง</td></tr>';
+      return;
+    }
+    const allReqs = window.SomboonTopupBridge?.getTopupRequests?.() || [];
+    const mine = allReqs.filter((r) => String(r.accountKey) === active.accountKey);
+    if (!mine.length) {
+      body.innerHTML = '<tr><td colspan="4">ยังไม่มีรายการคำขอเติมเงินของบัญชีนี้</td></tr>';
+      return;
+    }
+    body.innerHTML = mine.map((r) => `
+      <tr>
+        <td>${String(r.id)}</td>
+        <td>฿${Number(r.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+        <td>${String(r.submittedAt)}</td>
+        <td>${String(r.status)}</td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('topupSlipInput')?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    const fb = document.getElementById('topupSubmitFeedback');
+    const wrap = document.getElementById('topupSlipPreviewWrap');
+    const img = document.getElementById('topupSlipPreviewImg');
+    selectedSlipDataUrl = '';
+    selectedSlipMeta = { mime: '', size: 0 };
+    if (wrap) wrap.style.display = 'none';
+
+    if (!file) return;
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'ชนิดไฟล์สลิปไม่ถูกต้อง (รองรับเฉพาะ JPG, PNG, WEBP, GIF)'; }
+      e.target.value = '';
+      return;
+    }
+    if (file.size > MAX_SLIP_BYTES) {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'ขนาดไฟล์สลิปเกิน 5 MB'; }
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedSlipDataUrl = String(reader.result || '');
+      selectedSlipMeta = { mime: file.type, size: file.size };
+      if (img && wrap) {
+        img.src = selectedSlipDataUrl;
+        wrap.style.display = 'block';
+      }
+      if (fb) { fb.style.color = '#059669'; fb.textContent = 'แสดงตัวอย่างสลิปพร้อมส่งแล้ว'; }
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('submitTopupRequestBtn')?.addEventListener('click', () => {
+    const fb = document.getElementById('topupSubmitFeedback');
+    if (isSubmittingTopup) return;
+
+    const active = getActiveAccountInfo();
+    if (!active) {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'ไม่พบข้อมูลบัญชีที่เข้าสู่ระบบ'; }
+      return;
+    }
+
+    const amount = Number(document.getElementById('topupAmountInput')?.value);
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 10000000) {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'กรุณากรอกจำนวนเงินที่มากกว่า 0 บาท'; }
+      return;
+    }
+
+    if (!selectedSlipDataUrl) {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'กรุณาแนบรูปสลิปการโอนเงินก่อนส่งคำขอ'; }
+      return;
+    }
+
+    isSubmittingTopup = true;
+    const btn = document.getElementById('submitTopupRequestBtn');
+    if (btn) btn.disabled = true;
+
+    try {
+      const requestId = 'TOPUP-' + Date.now() + '-' + Math.floor(100 + Math.random() * 900);
+      const submittedAt = new Date().toLocaleString('th-TH');
+      const payload = {
+        id: requestId,
+        accountKey: active.accountKey,
+        customerName: active.customerName,
+        amount,
+        slipImage: selectedSlipDataUrl,
+        slipMime: selectedSlipMeta.mime,
+        slipSize: selectedSlipMeta.size,
+        submittedAt
+      };
+
+      // ห้ามเพิ่มยอดเงินคงเหลือที่หน้าบ้านทันที — ส่งคำขอให้ระบบหลังบ้าน/Backend ตรวจสอบและอนุมัติก่อน
+      if (typeof window.SomboonTopupBridge?.submitTopupRequest === 'function') {
+        window.SomboonTopupBridge.submitTopupRequest(payload);
+      }
+
+      if (fb) {
+        fb.style.color = '#d97706';
+        fb.textContent = `ส่งคำขอเติมเงิน (${requestId}) สำเร็จ — รายการอยู่ระหว่างรออนุมัติ (ยอดเงินคงเหลือยังไม่ถูกเพิ่ม)`;
+      }
+
+      document.getElementById('topupAmountInput').value = '';
+      document.getElementById('topupSlipInput').value = '';
+      selectedSlipDataUrl = '';
+      selectedSlipMeta = { mime: '', size: 0 };
+      const wrap = document.getElementById('topupSlipPreviewWrap');
+      if (wrap) wrap.style.display = 'none';
+      renderMyTopupHistory();
+    } finally {
+      isSubmittingTopup = false;
+      if (btn) btn.disabled = false;
+    }
+  });
+
+  renderMyTopupHistory();
+})();
+</script>
+
 <div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการสินค้าที่รอชำระเงิน</h2><small id="pendingOrderCount">0 รายการ</small></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>รายละเอียด</th><th>ยอด (บาท)</th><th>สถานะ</th><th></th></tr></thead><tbody id="pendingOrdersTable"></tbody></table></div></div>
 <div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการเดินบัญชี</h2></div><div class="table-wrap"><table><thead><tr><th>วันเวลา</th><th>รายละเอียด</th><th>เงินเข้า</th><th>เงินออก</th><th>ยอดคงเหลือ</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
 </section>
