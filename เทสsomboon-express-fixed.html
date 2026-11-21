@@ -213,21 +213,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 </section>
 
 <section id="payments" class="page">
-<div class="pagehead"><div><h1>การชำระเงินและบัญชี</h1><div class="sub">บันทึกเงินเข้า เงินออก และยอดคงเหลือในระบบ</div></div></div>
-<div class="grid stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-<div class="card"><div class="label">ยอดเงินคงเหลือ</div><div class="num" id="balanceBig">฿0.00</div></div>
-<div class="card"><div class="label">รายการเดินบัญชี</div><div class="num" id="paymentCount">0</div></div>
-</div>
-<div class="card">
-<div class="formgrid">
-<div class="field"><label>ประเภทรายการ</label><select id="payType"><option value="in">เติมเงิน / เงินเข้า</option><option value="out">ถอนเงิน / เงินออก</option></select></div>
-<div class="field"><label>จำนวนเงิน (บาท)</label><input id="payAmount" type="number" min="0.01" step=".01"></div>
-<div class="field"><label>รายละเอียด</label><input id="payNote" placeholder="เช่น เติมเงินค่าสินค้า"></div>
-</div><div class="actions"><button class="btn green" onclick="addPayment()">บันทึกรายการเงิน</button></div>
-</div>
+<div class="pagehead"><div><h1>การชำระเงินและบัญชี</h1><div class="sub">ส่งคำขอเติมเงินพร้อมแนบสลิปรอแอดมินตรวจสอบ และจัดการรายการสินค้าที่รอชำระเงิน</div></div></div>
 
-<!-- นำไปวางในหน้า "การชำระเงินและบัญชี" ของ เทสsomboon-express-fixed.html -->
-<div id="frontendTopupSection" class="card" style="margin-top:16px;">
+<div id="frontendTopupSection" class="card">
   <h3>เติมเงินเข้าบัญชี (รอแอดมินตรวจสอบสลิปและอนุมัติ)</h3>
   <div class="field">
     <label for="topupAmountInput">จำนวนเงิน (บาท)</label>
@@ -411,7 +399,6 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 </script>
 
 <div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการสินค้าที่รอชำระเงิน</h2><small id="pendingOrderCount">0 รายการ</small></div><div class="table-wrap"><table><thead><tr><th>เลขที่</th><th>รายละเอียด</th><th>ยอด (บาท)</th><th>สถานะ</th><th></th></tr></thead><tbody id="pendingOrdersTable"></tbody></table></div></div>
-<div class="card" style="margin-top:16px"><div class="section-title"><h2>รายการเดินบัญชี</h2></div><div class="table-wrap"><table><thead><tr><th>วันเวลา</th><th>รายละเอียด</th><th>เงินเข้า</th><th>เงินออก</th><th>ยอดคงเหลือ</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
 </section>
 
 <section id="calculator" class="page">
