@@ -965,8 +965,6 @@
         settings: 'Settings — ตั้งค่าระบบ'
       };
 
-      const ALLOWED_SLIP_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      const MAX_SLIP_BYTES = 5 * 1024 * 1024;
       let savedAdminKey = localStorage.getItem('somboon_admin_key') || '';
 
       function getAdminHeaders(extra = {}) {
@@ -1111,11 +1109,6 @@
         return adminState.customers.find((c) => String(c.key || '').trim().toLowerCase() === keyNorm) || null;
       }
 
-      function refreshCustomerStatus(customer) {
-        if (!customer) return;
-        customer.status = Number(customer.credit) > 0 ? 'ปกติ' : 'รอเติมเครดิต';
-      }
-
       function buildFrontendLink(customer, orderId = '') {
         const base = (adminState.frontendUrl || './เทสsomboon-express-fixed.html').trim() || './เทสsomboon-express-fixed.html';
         const sep = base.includes('?') ? '&' : '?';
@@ -1251,39 +1244,36 @@
           return false;
         }
 
-        const currentCredit = Number(customer.credit) || 0;
-        if (deltaSign < 0 && currentCredit < amount) {
-          if (msgEl) {
-            msgEl.style.color = '#dc2626';
-            msgEl.textContent = `ลดเครดิตไม่ได้: ${customer.name} มีเครดิตคงเหลือ ฿${money(currentCredit)} (น้อยกว่า ฿${money(amount)})`;
+        const delta = +(deltaSign * amount).toFixed(2);
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/credit/adjust`, {
+            method: 'POST',
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({
+              accountKey: customer.key,
+              delta,
+              note: (rawNote || '').trim(),
+              reviewedBy: 'Admin'
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data?.ok) {
+            if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = data?.message || 'ปรับเครดิตไม่สำเร็จ'; }
+            return false;
           }
+
+          if ($('creditAmountInput')) $('creditAmountInput').value = '';
+          if ($('creditNoteInput')) $('creditNoteInput').value = '';
+          if (msgEl) {
+            msgEl.style.color = '#059669';
+            msgEl.textContent = `${delta > 0 ? 'เพิ่ม' : 'ลด'}เครดิตให้ ${customer.name} จำนวน ฿${money(amount)} สำเร็จ (คงเหลือ ฿${money(data.balance)})`;
+          }
+          await syncBackendOverview();
+          return true;
+        } catch {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้'; }
           return false;
         }
-
-        const nextCredit = +(currentCredit + (deltaSign * amount)).toFixed(2);
-        customer.credit = nextCredit;
-        refreshCustomerStatus(customer);
-
-        const payEntry = {
-          id: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
-          customerId: customer.id,
-          customerName: customer.name,
-          refId: '-',
-          type: deltaSign > 0 ? 'เพิ่มเครดิต' : 'ลดเครดิต',
-          amount: deltaSign > 0 ? amount : -amount,
-          status: (rawNote || '').trim() || 'ปรับเครดิตโดยผู้ดูแล'
-        };
-        adminState.payments.unshift(payEntry);
-
-        if ($('creditAmountInput')) $('creditAmountInput').value = '';
-        if ($('creditNoteInput')) $('creditNoteInput').value = '';
-
-        if (msgEl) {
-          msgEl.style.color = '#059669';
-          msgEl.textContent = `${deltaSign > 0 ? 'เพิ่ม' : 'ลด'}เครดิตให้ ${customer.name} จำนวน ฿${money(amount)} แล้ว (คงเหลือ ฿${money(customer.credit)})`;
-        }
-        renderAll();
-        return true;
       }
 
       function openSlipPreview(requestId) {
@@ -1481,82 +1471,63 @@
           return;
         }
 
-        const newOrder = {
-          id: 'ORD-' + Math.floor(1050 + Math.random() * 8900),
-          customerId: customer.id,
-          accountKey: customer.key,
-          customerName: customer.name,
-          detail,
-          amount,
-          status: 'รอรับออเดอร์',
-          creditDeducted: false,
-          refUrl,
-          createdAt: new Date().toLocaleDateString('th-TH')
-        };
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/orders/create`, {
+            method: 'POST',
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({
+              accountKey: customer.key,
+              customerName: customer.name,
+              detail,
+              refUrl,
+              amount
+            })
+          });
+          const data = await res.json();
+          if (!res.ok || !data?.ok) {
+            if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = data?.message || 'สร้างคำสั่งซื้อไม่สำเร็จ'; }
+            return;
+          }
 
-        adminState.orders.unshift(newOrder);
-        if ($('orderAmountInput')) $('orderAmountInput').value = '';
-        if ($('orderDescInput')) $('orderDescInput').value = '';
-        if ($('orderRefUrlInput')) $('orderRefUrlInput').value = '';
-
-        if (msgEl) {
-          msgEl.style.color = '#d97706';
-          msgEl.textContent = `สร้างออเดอร์ ${newOrder.id} ยอด ฿${money(amount)} แล้ว`;
+          if ($('orderAmountInput')) $('orderAmountInput').value = '';
+          if ($('orderDescInput')) $('orderDescInput').value = '';
+          if ($('orderRefUrlInput')) $('orderRefUrlInput').value = '';
+          if (msgEl) {
+            msgEl.style.color = '#d97706';
+            msgEl.textContent = `สร้างออเดอร์ ${data.order?.id || ''} ยอด ฿${money(amount)} แล้ว (ยังไม่หักเครดิตจนกว่าแอดมินจะกดรับออเดอร์)`;
+          }
+          await syncBackendOverview();
+        } catch {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้'; }
         }
-        renderAll();
       }
 
       async function acceptOrder(orderId) {
         const msgEl = $('orderStatusMsg');
         if (!orderId || processingOrderIds.has(orderId)) return;
 
-        const order = adminState.orders.find((o) => o.id === orderId);
-        if (!order) return;
-
-        if (order.creditDeducted === true || order.status !== 'รอรับออเดอร์') {
-          if (msgEl) {
-            msgEl.style.color = '#dc2626';
-            msgEl.textContent = `ออเดอร์ ${order.id} ถูกดำเนินการหรือหักเครดิตไปแล้ว ไม่สามารถหักซ้ำได้`;
-          }
-          return;
-        }
-
-        const customer = findCustomerById(order.customerId) || findCustomerByAccountKey(order.accountKey);
-        const orderAmount = Number(order.amount) || 0;
-        const currentCredit = Number(customer?.credit) || 0;
-
-        if (!customer || currentCredit < orderAmount) {
-          if (msgEl) {
-            msgEl.style.color = '#dc2626';
-            msgEl.textContent = `รับออเดอร์ ${order.id} ไม่ได้: เครดิตคงเหลือ ฿${money(currentCredit)} ไม่เพียงพอกับยอดเต็มจำนวน ฿${money(orderAmount)}`;
-          }
-          return;
-        }
-
         processingOrderIds.add(orderId);
         renderAll();
 
         try {
-          customer.credit = +(currentCredit - orderAmount).toFixed(2);
-          refreshCustomerStatus(customer);
-          order.creditDeducted = true;
-          order.status = 'รับออเดอร์แล้ว (หักเครดิตแล้ว)';
-
-          const paymentRecord = {
-            id: 'PAY-' + Math.floor(10000 + Math.random() * 90000),
-            customerId: customer.id,
-            customerName: customer.name,
-            refId: order.id,
-            type: 'หักเครดิต (รับออเดอร์)',
-            amount: -orderAmount,
-            status: 'หักเต็มจำนวนแล้ว'
-          };
-          adminState.payments.unshift(paymentRecord);
+          const res = await fetch(`${API_BASE}/api/admin/orders/${encodeURIComponent(orderId)}/accept`, {
+            method: 'POST',
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ reviewedBy: 'Admin' })
+          });
+          const data = await res.json();
+          if (!res.ok || !data?.ok) {
+            if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = data?.message || `รับออเดอร์ ${orderId} ไม่สำเร็จ`; }
+            return;
+          }
 
           if (msgEl) {
             msgEl.style.color = '#059669';
-            msgEl.textContent = `รับออเดอร์ ${order.id} สำเร็จ — หักเครดิตเต็มจำนวน ฿${money(orderAmount)} ของ ${customer.name} แล้ว`;
+            msgEl.textContent = `รับออเดอร์ ${orderId} สำเร็จ — หักเครดิตเต็มจำนวน ฿${money(data.deductedAmount)} แล้ว (คงเหลือ ฿${money(data.balance)})`;
           }
+          await syncBackendOverview();
+        } catch {
+          if (msgEl) { msgEl.style.color = '#dc2626'; msgEl.textContent = `เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้ขณะรับออเดอร์ ${orderId}`; }
         } finally {
           processingOrderIds.delete(orderId);
           renderAll();
@@ -1587,7 +1558,7 @@
         renderTopupRequestsSection();
 
         const totalCredit = adminState.customers.reduce((sum, c) => sum + (Number(c.credit) || 0), 0);
-        const pendingOrders = adminState.orders.filter((o) => o.status === 'รอรับออเดอร์');
+        const pendingOrders = adminState.orders.filter((o) => !o.creditDeducted && !String(o.status || '').includes('รับออเดอร์แล้ว'));
 
         if ($('kpiOrdersCount')) $('kpiOrdersCount').textContent = `${adminState.orders.length} รายการ`;
         if ($('kpiPendingNote')) $('kpiPendingNote').textContent = `รอรับออเดอร์ ${pendingOrders.length} รายการ`;
@@ -1597,7 +1568,8 @@
 
         if ($('dashOrdersBody')) {
           $('dashOrdersBody').innerHTML = adminState.orders.slice(0, 5).map((o) => {
-            const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
+            const isAccepted = Boolean(o.creditDeducted) || String(o.status || '').includes('รับออเดอร์แล้ว');
+            const badgeClass = isAccepted ? 'b-ok' : 'b-wait';
             return `<tr>
               <td>${esc(o.id)}</td>
               <td>${esc(o.customerName || o.accountKey || '-')}</td>
@@ -1640,10 +1612,11 @@
           $('ordersTableBody').innerHTML = adminState.orders.map((o) => {
             const cust = findCustomerById(o.customerId) || findCustomerByAccountKey(o.accountKey);
             const custCredit = Number(cust?.credit) || 0;
-            const isWaiting = o.status === 'รอรับออเดอร์' && !o.creditDeducted;
+            const isAccepted = Boolean(o.creditDeducted) || String(o.status || '').includes('รับออเดอร์แล้ว');
+            const isWaiting = !isAccepted;
             const isBusy = processingOrderIds.has(o.id);
             const canAfford = custCredit >= (Number(o.amount) || 0);
-            const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
+            const badgeClass = isAccepted ? 'b-ok' : 'b-wait';
 
             let actionHtml = `<span class="badge b-info">${esc(o.status || 'รับแล้ว')}</span>`;
             if (isWaiting) {
