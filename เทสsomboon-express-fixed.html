@@ -251,13 +251,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 
 <script>
 (function () {
+  const API_BASE = 'http://localhost:3002';
   const MAX_SLIP_BYTES = 5 * 1024 * 1024;
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  let selectedSlipDataUrl = '';
-  let selectedSlipMeta = { mime: '', size: 0 };
+  let selectedSlipFile = null;
   let isSubmittingTopup = false;
 
-  // อ่านบัญชีที่กำลังล็อกอินจริงจาก localStorage ของหน้าบ้าน (ไม่ใช้ localStorage เป็นแหล่งอนุมัติยอดเงิน)
   function getActiveAccountInfo() {
     try {
       const session = JSON.parse(localStorage.getItem('somboon_session') || '{}');
@@ -274,7 +273,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
     }
   }
 
-  function renderMyTopupHistory() {
+  function formatTopupStatus(status) {
+    const s = String(status || '').toLowerCase();
+    if (s === 'approved' || s === 'อนุมัติ') return 'อนุมัติแล้ว';
+    if (s === 'rejected' || s === 'ปฏิเสธ') return 'ปฏิเสธแล้ว';
+    return 'รออนุมัติ';
+  }
+
+  async function renderMyTopupHistory() {
     const body = document.getElementById('myTopupHistoryBody');
     const active = getActiveAccountInfo();
     if (!body) return;
@@ -282,20 +288,30 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
       body.innerHTML = '<tr><td colspan="4">กรุณาเข้าสู่ระบบเพื่อดูประวัติคำขอเติมเงินของบัญชีตนเอง</td></tr>';
       return;
     }
-    const allReqs = window.SomboonTopupBridge?.getTopupRequests?.() || [];
-    const mine = allReqs.filter((r) => String(r.accountKey) === active.accountKey);
-    if (!mine.length) {
-      body.innerHTML = '<tr><td colspan="4">ยังไม่มีรายการคำขอเติมเงินของบัญชีนี้</td></tr>';
-      return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/topup/requests/my?accountKey=${encodeURIComponent(active.accountKey)}`);
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        body.innerHTML = '<tr><td colspan="4">ไม่สามารถโหลดประวัติคำขอเติมเงินจากเซิร์ฟเวอร์ได้</td></tr>';
+        return;
+      }
+      const list = Array.isArray(data.requests) ? data.requests : [];
+      if (!list.length) {
+        body.innerHTML = '<tr><td colspan="4">ยังไม่มีรายการคำขอเติมเงินของบัญชีนี้</td></tr>';
+        return;
+      }
+      body.innerHTML = list.map((r) => `
+        <tr>
+          <td>${String(r.id || '')}</td>
+          <td>฿${Number(r.amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+          <td>${String(r.submittedAt || r.submitted_at || '')}</td>
+          <td>${formatTopupStatus(r.status)}</td>
+        </tr>
+      `).join('');
+    } catch {
+      body.innerHTML = '<tr><td colspan="4">ยังไม่ได้เปิดเซิร์ฟเวอร์หลังบ้าน (http://localhost:3002)</td></tr>';
     }
-    body.innerHTML = mine.map((r) => `
-      <tr>
-        <td>${String(r.id)}</td>
-        <td>฿${Number(r.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
-        <td>${String(r.submittedAt)}</td>
-        <td>${String(r.status)}</td>
-      </tr>
-    `).join('');
   }
 
   document.getElementById('topupSlipInput')?.addEventListener('change', (e) => {
@@ -303,8 +319,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
     const fb = document.getElementById('topupSubmitFeedback');
     const wrap = document.getElementById('topupSlipPreviewWrap');
     const img = document.getElementById('topupSlipPreviewImg');
-    selectedSlipDataUrl = '';
-    selectedSlipMeta = { mime: '', size: 0 };
+    selectedSlipFile = null;
     if (wrap) wrap.style.display = 'none';
 
     if (!file) return;
@@ -319,12 +334,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
       return;
     }
 
+    selectedSlipFile = file;
     const reader = new FileReader();
     reader.onload = () => {
-      selectedSlipDataUrl = String(reader.result || '');
-      selectedSlipMeta = { mime: file.type, size: file.size };
       if (img && wrap) {
-        img.src = selectedSlipDataUrl;
+        img.src = String(reader.result || '');
         wrap.style.display = 'block';
       }
       if (fb) { fb.style.color = '#059669'; fb.textContent = 'แสดงตัวอย่างสลิปพร้อมส่งแล้ว'; }
@@ -332,7 +346,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
     reader.readAsDataURL(file);
   });
 
-  document.getElementById('submitTopupRequestBtn')?.addEventListener('click', () => {
+  document.getElementById('submitTopupRequestBtn')?.addEventListener('click', async () => {
     const fb = document.getElementById('topupSubmitFeedback');
     if (isSubmittingTopup) return;
 
@@ -348,7 +362,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
       return;
     }
 
-    if (!selectedSlipDataUrl) {
+    if (!selectedSlipFile) {
       if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'กรุณาแนบรูปสลิปการโอนเงินก่อนส่งคำขอ'; }
       return;
     }
@@ -358,24 +372,23 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
     if (btn) btn.disabled = true;
 
     try {
-      const requestId = 'TOPUP-' + Date.now() + '-' + Math.floor(100 + Math.random() * 900);
-      const submittedAt = new Date().toLocaleString('th-TH');
-      const payload = {
-        id: requestId,
-        accountKey: active.accountKey,
-        customerName: active.customerName,
-        amount,
-        slipImage: selectedSlipDataUrl,
-        slipMime: selectedSlipMeta.mime,
-        slipSize: selectedSlipMeta.size,
-        submittedAt
-      };
+      const formData = new FormData();
+      formData.append('accountKey', active.accountKey);
+      formData.append('customerName', active.customerName);
+      formData.append('amount', String(amount));
+      formData.append('slip', selectedSlipFile);
 
-      // ห้ามเพิ่มยอดเงินคงเหลือที่หน้าบ้านทันที — ส่งคำขอให้ระบบหลังบ้าน/Backend ตรวจสอบและอนุมัติก่อน
-      if (typeof window.SomboonTopupBridge?.submitTopupRequest === 'function') {
-        window.SomboonTopupBridge.submitTopupRequest(payload);
+      const res = await fetch(`${API_BASE}/api/topup/requests`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        if (fb) { fb.style.color = '#dc2626'; fb.textContent = data?.message || 'ส่งคำขอเติมเงินไม่สำเร็จ'; }
+        return;
       }
 
+      const requestId = data.id || data.requestId || '-';
       if (fb) {
         fb.style.color = '#d97706';
         fb.textContent = `ส่งคำขอเติมเงิน (${requestId}) สำเร็จ — รายการอยู่ระหว่างรออนุมัติ (ยอดเงินคงเหลือยังไม่ถูกเพิ่ม)`;
@@ -383,11 +396,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 8px}
 
       document.getElementById('topupAmountInput').value = '';
       document.getElementById('topupSlipInput').value = '';
-      selectedSlipDataUrl = '';
-      selectedSlipMeta = { mime: '', size: 0 };
+      selectedSlipFile = null;
       const wrap = document.getElementById('topupSlipPreviewWrap');
       if (wrap) wrap.style.display = 'none';
-      renderMyTopupHistory();
+      await renderMyTopupHistory();
+    } catch {
+      if (fb) { fb.style.color = '#dc2626'; fb.textContent = 'เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้ กรุณาเช็กว่าเปิด server.js อยู่หรือไม่'; }
     } finally {
       isSubmittingTopup = false;
       if (btn) btn.disabled = false;
