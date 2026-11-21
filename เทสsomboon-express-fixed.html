@@ -550,6 +550,7 @@ ensureDemoAccounts();
 let orders = [], parcels = [], deliveries = [], payments = [];
 let rates = { yuan: '5.30', truck: '', ship: '', kg: '', min: '' };
 let currentAccountKey = '';
+let backendBalance = 0;
 const payingOrderIds = new Set();
 
 const BACKEND_API_BASE = 'http://localhost:3002/api/customer';
@@ -592,6 +593,9 @@ async function syncBackendAction(actionType, payload) {
       if (res.ok) {
         try {
           const json = await res.json();
+          if (typeof json?.balance === 'number') backendBalance = Math.max(0, json.balance);
+          else if (typeof json?.walletBalance === 'number') backendBalance = Math.max(0, json.walletBalance);
+          else if (typeof json?.data?.balance === 'number') backendBalance = Math.max(0, json.data.balance);
           return { ok: json?.ok !== false, offline: false, data: json, message: json?.message };
         } catch {
           return { ok: true, offline: false };
@@ -618,6 +622,7 @@ async function fetchBackendAccountState(accountKey) {
       if (res.ok) {
         const json = await res.json();
         if (json && typeof json === 'object') {
+          if (typeof json.balance === 'number') backendBalance = Math.max(0, json.balance);
           return json.data || json;
         }
       }
@@ -662,6 +667,7 @@ function loadAccountIntoWorkspace(key) {
   deliveries = Array.isArray(acc.deliveries) ? acc.deliveries : [];
   payments = Array.isArray(acc.payments) ? acc.payments : [];
   rates = acc.rates || { yuan: '5.30', truck: '', ship: '', kg: '', min: '' };
+  backendBalance = 0;
 
   sessionState = { activeKey: key, loggedIn: true };
   saveRaw('somboon_session', sessionState);
@@ -674,6 +680,8 @@ function loadAccountIntoWorkspace(key) {
   fetchBackendAccountState(key).then(remote => {
     if (!remote || currentAccountKey !== key) return;
     let updated = false;
+    if (typeof remote.balance === 'number') { backendBalance = Math.max(0, remote.balance); updated = true; }
+    else if (typeof remote.walletBalance === 'number') { backendBalance = Math.max(0, remote.walletBalance); updated = true; }
     if (Array.isArray(remote.orders)) { orders = remote.orders; updated = true; }
     if (Array.isArray(remote.parcels)) { parcels = remote.parcels; updated = true; }
     if (Array.isArray(remote.deliveries)) { deliveries = remote.deliveries; updated = true; }
@@ -1396,15 +1404,19 @@ function showPage(id){
 }
 document.querySelectorAll('.navbtn').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
 
-function money(n){return Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function money(n){const num=Number(n||0);return num.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function badge(s){return `<span class="pill ${s==='เสร็จสิ้น'||s==='ถึงประเทศไทย'||s==='สำเร็จ'||s==='ชำระแล้ว'?'green':s.includes('รอ')||s.includes('เตรียม')?'orange':''}">${esc(s)}</span>`}
 
 function getCurrentBalance(){
-  return payments.reduce((s,p)=>{
+  if (typeof backendBalance === 'number' && !Number.isNaN(backendBalance)) {
+    return Math.max(0, backendBalance);
+  }
+  const calc = payments.reduce((s,p)=>{
     const amt = Number(p.amount) || 0;
     return s + (p.type==='in' ? amt : -amt);
   }, 0);
+  return Math.max(0, calc);
 }
 
 function renderOrderStatusCell(order){
@@ -1686,7 +1698,7 @@ function exportData(){
 
 function clearData(){
   if(!confirm('ยืนยันล้างข้อมูลของบัญชีนี้ทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) return;
-  orders=[];parcels=[];deliveries=[];payments=[];rates={yuan:'5.30',truck:'',ship:'',kg:'',min:''};
+  orders=[];parcels=[];deliveries=[];payments=[];backendBalance=0;rates={yuan:'5.30',truck:'',ship:'',kg:'',min:''};
   persistCurrentAccount();
   syncBackendAction('clear_data', { accountKey: currentAccountKey });
   syncRateInputs();
