@@ -494,7 +494,7 @@
     <aside class="sidebar" id="sidebar" aria-label="เมนูหลักผู้ดูแลระบบ">
       <div class="brand">
         <div class="brand-title">SOMBOON EXPRESS</div>
-        <div class="brand-sub">ระบบหลังบ้านผู้ดูแล (เตรียมเชื่อมหน้าบ้าน)</div>
+        <div class="brand-sub">ระบบหลังบ้านผู้ดูแล (เชื่อมฐานข้อมูลกลาง)</div>
       </div>
 
       <nav class="nav-list" id="navList">
@@ -509,8 +509,8 @@
       </nav>
 
       <div class="sidebar-foot">
-        โหมดเตรียมโครงสร้างหลังบ้าน<br />
-        ยังไม่เชื่อม Backend หรือฐานข้อมูลจริง
+        SOMBOON EXPRESS ADMIN<br />
+        เชื่อมต่อฐานข้อมูลกลาง (http://localhost:3002)
       </div>
     </aside>
 
@@ -522,7 +522,7 @@
         </div>
         <div class="topbar-right">
           <span class="pill">ผู้ดูแลระบบ: Admin</span>
-          <span class="pill warn">พร้อมรองรับหน้าบ้าน</span>
+          <span class="pill warn" id="backendConnBadge">เชื่อมฐานข้อมูลกลาง</span>
         </div>
       </header>
 
@@ -654,7 +654,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">รายชื่อลูกค้าและเครดิต (Customers)</h2>
-              <p class="section-desc">อ่านชื่อลูกค้าจากระบบหน้าบ้าน (localStorage คีย์ somboon_accounts) โดยไม่แก้ไขข้อมูลใน localStorage</p>
+              <p class="section-desc">อ่านชื่อลูกค้าจากระบบหน้าบ้าน (localStorage คีย์ somboon_accounts) และยอดเครดิตในฐานข้อมูลกลาง</p>
             </div>
           </div>
 
@@ -682,7 +682,7 @@
           <div class="card" style="margin-bottom:16px;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
               <h3 class="card-title" style="margin:0;">ปรับเครดิตลูกค้า (เพิ่ม / ลด)</h3>
-              <span class="badge b-wait">ข้อมูลตัวอย่างหลังบ้าน</span>
+              <span class="badge b-info">ระบบหลังบ้าน</span>
             </div>
             <div class="form-grid">
               <div class="field">
@@ -699,7 +699,7 @@
               </div>
               <div class="field">
                 <label for="frontUrlInput">ลิงก์ระบบหน้าบ้าน (สำหรับเปิดเชื่อมลูกค้า)</label>
-                <input id="frontUrlInput" type="text" value="./index.html" placeholder="เช่น ./index.html หรือลิงก์หน้าบ้าน" />
+                <input id="frontUrlInput" type="text" value="./เทสsomboon-express-fixed.html" placeholder="เช่น ./เทสsomboon-express-fixed.html" />
               </div>
             </div>
             <div class="btn-row">
@@ -712,8 +712,8 @@
 
           <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-              <h3 class="card-title" style="margin:0;">บัญชีลูกค้าในระบบ (ข้อมูลตัวอย่างหลังบ้าน)</h3>
-              <span class="badge b-wait">ข้อมูลตัวอย่าง</span>
+              <h3 class="card-title" style="margin:0;">บัญชีลูกค้าในระบบ</h3>
+              <span class="badge b-ok">ฐานข้อมูลกลาง</span>
             </div>
             <div class="table-wrap">
               <table>
@@ -737,7 +737,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">รายการสินค้า (Products)</h2>
-              <p class="section-desc">โครงสร้างแสดงรายการสินค้าที่ดึงหรือบันทึกไว้ (รอเชื่อมฟังก์ชันและ API ในขั้นถัดไป)</p>
+              <p class="section-desc">โครงสร้างแสดงรายการสินค้าที่ดึงหรือบันทึกไว้</p>
             </div>
           </div>
           <div class="card">
@@ -778,7 +778,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">ติดตามพัสดุ (Parcels)</h2>
-              <p class="section-desc">โครงสร้างติดตามเลขพัสดุจีน-ไทย น้ำหนัก และขนาดกล่อง (รอเชื่อมข้อมูลในขั้นถัดไป)</p>
+              <p class="section-desc">โครงสร้างติดตามเลขพัสดุจีน-ไทย น้ำหนัก และขนาดกล่อง</p>
             </div>
           </div>
           <div class="card">
@@ -819,7 +819,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">การเงินและการชำระเงิน (Payments)</h2>
-              <p class="section-desc">บันทึกประวัติการเพิ่ม/ลดเครดิต และการหักเครดิตเมื่อแอดมินรับออเดอร์</p>
+              <p class="section-desc">ตรวจสอบสลิป อนุมัติหรือปฏิเสธคำขอเติมเงิน และดูประวัติธุรกรรมเครดิต</p>
             </div>
           </div>
 
@@ -834,7 +834,7 @@
                 <button class="btn btn-ghost" type="button" id="refreshTopupRequestsBtn">รีเฟรช</button>
               </div>
             </div>
-            <div class="info-box" id="topupStorageStatus">โหมดหน่วยความจำหน้าเว็บปัจจุบัน (ยังไม่เชื่อม Backend หรือฐานข้อมูลจริง) — รายการรออนุมัติและปฏิเสธจะไม่เพิ่มเครดิต</div>
+            <div class="info-box" id="topupStorageStatus">เชื่อมต่อฐานข้อมูลกลางผ่าน http://localhost:3002 — กดอนุมัติเพื่อเพิ่มเครดิตให้บัญชีลูกค้าจริง</div>
             <div class="table-wrap">
               <table>
                 <thead>
@@ -880,11 +880,11 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">อัตราค่าขนส่งและเรท (Shipping Rates)</h2>
-              <p class="section-desc">โครงสร้างฟอร์มกำหนดเรทค่าขนส่งและอัตราแลกเปลี่ยน (รอเชื่อมบันทึกจริงในขั้นถัดไป)</p>
+              <p class="section-desc">กำหนดเรทค่าขนส่งและอัตราแลกเปลี่ยน</p>
             </div>
           </div>
           <div class="card">
-            <h3 class="card-title">ตั้งค่าอัตราค่าขนส่ง (ตัวอย่างหน้าจอ)</h3>
+            <h3 class="card-title">ตั้งค่าอัตราค่าขนส่ง</h3>
             <div class="form-grid">
               <div class="field">
                 <label for="rateFx">อัตราแลกเปลี่ยน (บาท ต่อ 1 หยวน)</label>
@@ -904,7 +904,7 @@
               </div>
             </div>
             <div class="btn-row">
-              <button class="btn btn-primary" type="button" id="previewRateBtn">แสดงตัวอย่างค่าที่กรอก (ยังไม่บันทึกจริง)</button>
+              <button class="btn btn-primary" type="button" id="previewRateBtn">แสดงตัวอย่างค่าที่กรอก</button>
             </div>
             <div class="demo-banner" id="rateBanner"></div>
           </div>
@@ -914,7 +914,7 @@
           <div class="section-head">
             <div>
               <h2 class="section-title">ตั้งค่าระบบ (Settings)</h2>
-              <p class="section-desc">โครงสร้างการตั้งค่าพื้นฐานของระบบหลังบ้าน SOMBOON EXPRESS</p>
+              <p class="section-desc">ข้อมูลการเชื่อมต่อระบบหลังบ้าน SOMBOON EXPRESS</p>
             </div>
           </div>
           <div class="card">
@@ -925,14 +925,12 @@
                 <input id="setBrand" type="text" value="SOMBOON EXPRESS" />
               </div>
               <div class="field">
-                <label for="setMode">โหมดการทำงานปัจจุบัน</label>
-                <select id="setMode">
-                  <option value="admin-ready-local" selected>เตรียมโครงสร้างหลังบ้าน & เชื่อมโยงข้อมูล (ยังไม่เชื่อม DB จริง)</option>
-                  <option value="pending-api">รอเชื่อมต่อ API / ฐานข้อมูลในขั้นถัดไป</option>
-                </select>
+                <label for="setAdminKey">ADMIN_KEY สำหรับเรียก API หลังบ้าน (ถ้าตั้งไว้ใน .env)</label>
+                <input id="setAdminKey" type="text" placeholder="ปล่อยว่างได้ถ้าไม่ได้ตั้ง ADMIN_KEY ใน .env" />
               </div>
             </div>
             <div class="btn-row">
+              <button class="btn btn-primary" type="button" id="saveAdminKeyBtn">บันทึก ADMIN_KEY และรีเฟรชข้อมูล</button>
               <button class="btn btn-ghost" type="button" id="previewSetBtn">ดูสรุปค่าในฟอร์ม</button>
             </div>
             <div class="demo-banner" id="setBanner"></div>
@@ -955,6 +953,7 @@
 
   <script>
     (function () {
+      const API_BASE = 'http://localhost:3002';
       const pageMeta = {
         dashboard: 'Dashboard',
         orders: 'Orders — จัดการคำสั่งซื้อ',
@@ -967,7 +966,16 @@
       };
 
       const ALLOWED_SLIP_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      const MAX_SLIP_BYTES = 5 * 1024 * 1024; // 5 MB
+      const MAX_SLIP_BYTES = 5 * 1024 * 1024;
+      let savedAdminKey = localStorage.getItem('somboon_admin_key') || '';
+
+      function getAdminHeaders(extra = {}) {
+        const headers = { ...extra };
+        if (savedAdminKey) {
+          headers['x-admin-key'] = savedAdminKey;
+        }
+        return headers;
+      }
 
       function isSafeSlipSrc(src) {
         const s = String(src || '').trim();
@@ -981,6 +989,13 @@
         } catch {
           return false;
         }
+      }
+
+      function mapBackendStatusToThai(status) {
+        const s = String(status || '').toLowerCase();
+        if (s === 'approved' || s === 'อนุมัติ' || s === 'อนุมัติแล้ว') return 'อนุมัติ';
+        if (s === 'rejected' || s === 'ปฏิเสธ' || s === 'ปฏิเสธแล้ว') return 'ปฏิเสธ';
+        return 'รออนุมัติ';
       }
 
       function readFrontendCustomersFromStorage() {
@@ -999,7 +1014,7 @@
             };
           }
           rawAccounts = JSON.parse(rawStr);
-        } catch (err) {
+        } catch {
           return {
             originText,
             customers: [],
@@ -1063,76 +1078,12 @@
         }).join('');
       }
 
-      /* =====================================================================
-         Backend / Storage Adapter Interface (โหมดหน่วยความจำหน้าเว็บปัจจุบัน
-         รอการเชื่อม Backend/Database/Storage จริงและตรวจสอบสิทธิ์ฝั่งเซิร์ฟเวอร์)
-      ===================================================================== */
-      const AdminDataAdapter = {
-        mode: 'local-memory-only',
-        async getSnapshot(state) {
-          return { ok: true, mode: this.mode, data: state };
-        },
-        async adjustCustomerCredit(payload) {
-          return { ok: true, mode: this.mode, payload };
-        },
-        async createOrder(order) {
-          return { ok: true, mode: this.mode, order };
-        },
-        async acceptOrderAndDeduct(order, payment) {
-          return { ok: true, mode: this.mode, order, payment };
-        },
-        async reviewTopupRequest(payload) {
-          return { ok: true, mode: this.mode, payload };
-        }
-      };
-
       const adminState = {
-        frontendUrl: './index.html',
+        frontendUrl: './เทสsomboon-express-fixed.html',
         topupFilter: 'ทั้งหมด',
-        customers: [
-          { id: 'CUS-001', key: 'kittipong@somboon.local', name: 'คุณกิตติพงษ์', contact: '08x-xxx-1122', credit: 18500, status: 'ปกติ' },
-          { id: 'CUS-002', key: 'pingklao@somboon.local', name: 'ร้านปิ่นเกล้า มิวสิค', contact: 'Line: @pingklao', credit: 4200, status: 'ปกติ' },
-          { id: 'CUS-003', key: 'ornanong@somboon.local', name: 'คุณอรอนงค์', contact: '09x-xxx-8899', credit: 0, status: 'รอเติมเครดิต' }
-        ],
-        orders: [
-          {
-            id: 'ORD-1041',
-            customerId: 'CUS-001',
-            customerName: 'คุณกิตติพงษ์',
-            detail: '4 สเปค (ชุดตัวอย่าง)',
-            amount: 12450,
-            status: 'รับออเดอร์แล้ว (หักเครดิตแล้ว)',
-            creditDeducted: true,
-            refUrl: '',
-            createdAt: '20/11/2026'
-          },
-          {
-            id: 'ORD-1042',
-            customerId: 'CUS-002',
-            customerName: 'ร้านปิ่นเกล้า มิวสิค',
-            detail: '2 สเปค (รอแอดมินรับออเดอร์)',
-            amount: 3500,
-            status: 'รอรับออเดอร์',
-            creditDeducted: false,
-            refUrl: '',
-            createdAt: '20/11/2026'
-          },
-          {
-            id: 'ORD-1043',
-            customerId: 'CUS-003',
-            customerName: 'คุณอรอนงค์',
-            detail: '1 สเปค (เครดิตยังไม่พอ)',
-            amount: 3190,
-            status: 'รอรับออเดอร์',
-            creditDeducted: false,
-            refUrl: '',
-            createdAt: '19/11/2026'
-          }
-        ],
-        payments: [
-          { id: 'PAY-5001', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: '-', type: 'เพิ่มเครดิต', amount: 20000, status: 'ยืนยันแล้ว' },
-          { id: 'PAY-5002', customerId: 'CUS-001', customerName: 'คุณกิตติพงษ์', refId: 'ORD-1041', type: 'หักเครดิต (รับออเดอร์)', amount: -12450, status: 'หักแล้ว' }
-        ],
+        customers: [],
+        orders: [],
+        payments: [],
         topupRequests: []
       };
 
@@ -1155,9 +1106,9 @@
       }
 
       function findCustomerByAccountKey(accountKey) {
-        const keyNorm = String(accountKey ?? '').trim();
+        const keyNorm = String(accountKey ?? '').trim().toLowerCase();
         if (!keyNorm) return null;
-        return adminState.customers.find((c) => String(c.key || '').trim() === keyNorm) || null;
+        return adminState.customers.find((c) => String(c.key || '').trim().toLowerCase() === keyNorm) || null;
       }
 
       function refreshCustomerStatus(customer) {
@@ -1166,7 +1117,7 @@
       }
 
       function buildFrontendLink(customer, orderId = '') {
-        const base = (adminState.frontendUrl || './index.html').trim() || './index.html';
+        const base = (adminState.frontendUrl || './เทสsomboon-express-fixed.html').trim() || './เทสsomboon-express-fixed.html';
         const sep = base.includes('?') ? '&' : '?';
         const params = [];
         if (customer?.key) params.push('account=' + encodeURIComponent(customer.key));
@@ -1185,9 +1136,110 @@
         window.open(targetUrl, '_blank', 'noopener,noreferrer');
       }
 
+      async function syncBackendTopupRequests() {
+        const statusBox = $('topupStorageStatus');
+        const msgEl = $('topupStatusMsg');
+        const badgeEl = $('backendConnBadge');
+
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/topup/requests`, {
+            headers: getAdminHeaders()
+          });
+          const data = await res.json();
+
+          if (!res.ok || !data?.ok) {
+            if (badgeEl) badgeEl.textContent = 'ตรวจสอบสิทธิ์ ADMIN_KEY';
+            if (statusBox) {
+              statusBox.textContent = `ไม่สามารถดึงคำขอเติมเงินจากเซิร์ฟเวอร์: ${data?.message || res.status}`;
+            }
+            if (msgEl) {
+              msgEl.style.color = '#dc2626';
+              msgEl.textContent = data?.message || 'เกิดข้อผิดพลาดในการโหลดคำขอเติมเงิน';
+            }
+            return;
+          }
+
+          if (badgeEl) {
+            badgeEl.className = 'pill';
+            badgeEl.textContent = 'เชื่อมฐานข้อมูลกลางสำเร็จ';
+          }
+          if (statusBox) {
+            statusBox.textContent = `เชื่อมต่อฐานข้อมูลกลาง (${API_BASE}) แล้ว — โหลดคำขอเติมเงินจากฐานข้อมูลจริง`;
+          }
+
+          const rawList = Array.isArray(data.requests) ? data.requests : [];
+          adminState.topupRequests = rawList.map((r) => {
+            const thaiStatus = mapBackendStatusToThai(r.status);
+            const slipSrc = r.slipUrl || r.slipImage || '';
+            return {
+              id: String(r.id || ''),
+              accountKey: String(r.accountKey || r.account_key || '-'),
+              customerId: String(r.accountKey || r.account_key || '-'),
+              customerName: String(r.customerName || r.customer_name || r.accountKey || '-'),
+              amount: Number(r.amount || 0),
+              slipImage: isSafeSlipSrc(slipSrc) ? slipSrc : '',
+              submittedAt: String(r.submittedAt || r.submitted_at || ''),
+              status: thaiStatus,
+              creditAdded: thaiStatus === 'อนุมัติ',
+              reviewedBy: String(r.reviewedBy || r.reviewed_by || ''),
+              reviewedAt: String(r.reviewedAt || r.reviewed_at || ''),
+              rejectReason: r.rejectReason || r.reject_reason || ''
+            };
+          });
+
+          renderTopupRequestsSection();
+        } catch {
+          if (badgeEl) {
+            badgeEl.className = 'pill warn';
+            badgeEl.textContent = 'ยังไม่ได้เปิดเซิร์ฟเวอร์ :3002';
+          }
+          if (statusBox) {
+            statusBox.textContent = `เชื่อมต่อเซิร์ฟเวอร์หลังบ้าน (${API_BASE}) ไม่ได้ — กรุณาตรวจสอบว่าเปิด server.js อยู่หรือไม่`;
+          }
+        }
+      }
+
+      async function syncBackendOverview() {
+        try {
+          const res = await fetch(`${API_BASE}/api/admin/overview`, {
+            headers: getAdminHeaders()
+          });
+          if (!res.ok) return;
+          const json = await res.json();
+          const central = json?.db;
+          if (!central || typeof central !== 'object') return;
+
+          const wallets = central.wallets && typeof central.wallets === 'object' ? central.wallets : {};
+          const custList = Array.isArray(central.customers) ? central.customers : [];
+          const keySet = new Set([
+            ...custList.map((c) => String(c.key || c.accountKey || c.id || '').trim().toLowerCase()).filter(Boolean),
+            ...Object.keys(wallets).map((k) => String(k || '').trim().toLowerCase()).filter(Boolean)
+          ]);
+
+          const mergedCustomers = [];
+          keySet.forEach((k) => {
+            const found = custList.find((c) => String(c.key || c.accountKey || c.id || '').trim().toLowerCase() === k);
+            const bal = Number(wallets[k] ?? 0);
+            mergedCustomers.push({
+              id: found?.id || k,
+              key: found?.key || k,
+              name: found?.name || k,
+              contact: found?.contact || k,
+              credit: bal,
+              status: bal > 0 ? 'ปกติ' : 'รอเติมเครดิต'
+            });
+          });
+
+          adminState.customers = mergedCustomers;
+          adminState.orders = Array.isArray(central.orders) ? central.orders : [];
+          adminState.payments = Array.isArray(central.payments) ? central.payments : [];
+          renderAll();
+        } catch {}
+      }
+
       async function adjustCredit(customerId, deltaSign, rawAmount, rawNote) {
         const msgEl = $('creditStatusMsg');
-        const customer = findCustomerById(customerId);
+        const customer = findCustomerById(customerId) || findCustomerByAccountKey(customerId);
         const amount = Number(rawAmount);
 
         if (!customer) {
@@ -1223,13 +1275,6 @@
         };
         adminState.payments.unshift(payEntry);
 
-        await AdminDataAdapter.adjustCustomerCredit({
-          customerId: customer.id,
-          delta: deltaSign * amount,
-          creditAfter: customer.credit,
-          payment: payEntry
-        });
-
         if ($('creditAmountInput')) $('creditAmountInput').value = '';
         if ($('creditNoteInput')) $('creditNoteInput').value = '';
 
@@ -1239,75 +1284,6 @@
         }
         renderAll();
         return true;
-      }
-
-      /* =====================================================================
-         ระบบจัดการคำขอเติมเงินในเมนู Payments (รออนุมัติ / อนุมัติ / ปฏิเสธ)
-         - ไม่เพิ่มเครดิตเมื่อรับคำขอหรือเมื่อสถานะเป็น "รออนุมัติ" หรือ "ปฏิเสธ"
-         - อนุมัติแล้วล็อกไม่ให้อนุมัติซ้ำหรือเพิ่มเครดิตซ้ำ
-         - บันทึกประวัติผู้ทำรายการและเวลาทำรายการ
-      ===================================================================== */
-      function normalizeTopupRequest(payload) {
-        if (!payload || typeof payload !== 'object') return null;
-        const accountKey = String(payload.accountKey ?? payload.customerKey ?? payload.customerId ?? '').trim();
-        const matchedCustomer = findCustomerByAccountKey(accountKey) || findCustomerById(accountKey);
-        const customerId = String(matchedCustomer?.id || payload.customerId || '').trim();
-        const customerName = String(
-          payload.customerName || payload.name || matchedCustomer?.name || accountKey || '-'
-        ).trim();
-        const amount = Number(payload.amount);
-        if (!Number.isFinite(amount) || amount <= 0 || amount > 10000000) return null;
-
-        const rawSlip = String(payload.slipImage || payload.slipUrl || payload.slip || '').trim();
-        const slipMime = String(payload.slipMime || '').trim().toLowerCase();
-        const slipSize = Number(payload.slipSize || 0);
-        if (slipMime && !ALLOWED_SLIP_TYPES.includes(slipMime)) return null;
-        if (slipSize > 0 && slipSize > MAX_SLIP_BYTES) return null;
-        const slipImage = isSafeSlipSrc(rawSlip) ? rawSlip : '';
-
-        const submittedAt = String(payload.submittedAt || payload.createdAt || '').trim()
-          || new Date().toLocaleString('th-TH');
-        const requestId = String(payload.id || payload.requestId || '').trim()
-          || ('TOPUP-' + Math.floor(10000 + Math.random() * 90000));
-
-        if (adminState.topupRequests.some((item) => item.id === requestId)) {
-          return null;
-        }
-
-        return {
-          id: requestId,
-          accountKey: accountKey || String(matchedCustomer?.key || '-'),
-          customerId,
-          customerName,
-          amount: +amount.toFixed(2),
-          slipImage,
-          submittedAt,
-          status: 'รออนุมัติ',
-          creditAdded: false,
-          reviewedBy: '',
-          reviewedAt: ''
-        };
-      }
-
-      function receiveTopupRequest(payload) {
-        const msgEl = $('topupStatusMsg');
-        const req = normalizeTopupRequest(payload);
-        if (!req) {
-          if (msgEl) {
-            msgEl.style.color = '#dc2626';
-            msgEl.textContent = 'คำขอเติมเงินไม่ผ่านการตรวจสอบ (ยอดเงินต้องมากกว่า 0 บาท, รหัสคำขอไม่ซ้ำ และไฟล์สลิปต้องถูกต้อง)';
-          }
-          return null;
-        }
-        req.status = 'รออนุมัติ';
-        req.creditAdded = false;
-        adminState.topupRequests.unshift(req);
-        if (msgEl) {
-          msgEl.style.color = '#d97706';
-          msgEl.textContent = `รับคำขอเติมเงิน ${req.id} ของ ${req.customerName} ยอด ฿${money(req.amount)} แล้ว (สถานะ: รออนุมัติ — เครดิตยังไม่ถูกเพิ่ม)`;
-        }
-        renderTopupRequestsSection();
-        return req;
       }
 
       function openSlipPreview(requestId) {
@@ -1341,16 +1317,7 @@
         if (req.status !== 'รออนุมัติ' || req.creditAdded === true) {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
-            msgEl.textContent = `คำขอเติมเงิน ${req.id} ถูกจัดการแล้ว (สถานะ: ${req.status}) ไม่สามารถอนุมัติหรือเพิ่มเครดิตซ้ำได้`;
-          }
-          return;
-        }
-
-        const targetCustomer = findCustomerByAccountKey(req.accountKey) || findCustomerById(req.customerId);
-        if (!targetCustomer) {
-          if (msgEl) {
-            msgEl.style.color = '#dc2626';
-            msgEl.textContent = `ไม่พบบัญชีลูกค้าที่เป็นเจ้าของคำขอ ${req.id} (บัญชี: ${req.accountKey}) ในระบบหลังบ้าน`;
+            msgEl.textContent = `คำขอเติมเงิน ${req.id} ถูกจัดการแล้ว (สถานะ: ${req.status}) ไม่สามารถอนุมัติซ้ำได้`;
           }
           return;
         }
@@ -1358,58 +1325,37 @@
         processingTopupIds.add(requestId);
         renderTopupRequestsSection();
 
-        const prevStatus = req.status;
-        const prevCreditAdded = req.creditAdded;
-        const prevReviewedBy = req.reviewedBy;
-        const prevReviewedAt = req.reviewedAt;
-
         try {
-          req.status = 'อนุมัติ';
-          req.creditAdded = true;
-          req.customerId = targetCustomer.id;
-          req.reviewedBy = 'Admin';
-          req.reviewedAt = new Date().toLocaleString('th-TH');
+          const res = await fetch(`${API_BASE}/api/admin/topup/requests/${encodeURIComponent(requestId)}/approve`, {
+            method: 'POST',
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ reviewedBy: 'Admin' })
+          });
+          const data = await res.json();
 
-          const applied = await adjustCredit(
-            targetCustomer.id,
-            1,
-            req.amount,
-            `อนุมัติคำขอเติมเงิน ${req.id} (${req.accountKey})`
-          );
-
-          if (!applied) {
-            req.status = prevStatus;
-            req.creditAdded = prevCreditAdded;
-            req.reviewedBy = prevReviewedBy;
-            req.reviewedAt = prevReviewedAt;
+          if (!res.ok || !data?.ok) {
+            if (msgEl) {
+              msgEl.style.color = '#dc2626';
+              msgEl.textContent = data?.message || `อนุมัติคำขอ ${requestId} ไม่สำเร็จ`;
+            }
             return;
           }
 
-          await AdminDataAdapter.reviewTopupRequest({
-            requestId: req.id,
-            status: req.status,
-            customerId: targetCustomer.id,
-            amount: req.amount,
-            reviewedBy: req.reviewedBy,
-            reviewedAt: req.reviewedAt
-          });
-
           if (msgEl) {
             msgEl.style.color = '#059669';
-            msgEl.textContent = `อนุมัติคำขอเติมเงิน ${req.id} สำเร็จ — เพิ่มเครดิต ฿${money(req.amount)} ให้บัญชี ${targetCustomer.name} (${req.accountKey}) แล้ว`;
+            msgEl.textContent = `อนุมัติคำขอเติมเงิน ${requestId} สำเร็จ — เพิ่มยอด ฿${money(data.creditedAmount)} ให้บัญชี ${data.accountKey} แล้ว (ยอดคงเหลือใหม่: ฿${money(data.balance)})`;
           }
-        } catch (err) {
-          req.status = prevStatus;
-          req.creditAdded = prevCreditAdded;
-          req.reviewedBy = prevReviewedBy;
-          req.reviewedAt = prevReviewedAt;
+
+          await syncBackendTopupRequests();
+          await syncBackendOverview();
+        } catch {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
-            msgEl.textContent = `เกิดข้อผิดพลาดระหว่างอนุมัติคำขอ ${req.id} — ยกเลิกการเปลี่ยนสถานะและเครดิตแล้ว`;
+            msgEl.textContent = `เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้ขณะอนุมัติ ${requestId}`;
           }
         } finally {
           processingTopupIds.delete(requestId);
-          renderAll();
+          renderTopupRequestsSection();
         }
       }
 
@@ -1432,23 +1378,32 @@
         renderTopupRequestsSection();
 
         try {
-          req.status = 'ปฏิเสธ';
-          req.creditAdded = false;
-          req.reviewedBy = 'Admin';
-          req.reviewedAt = new Date().toLocaleString('th-TH');
-
-          await AdminDataAdapter.reviewTopupRequest({
-            requestId: req.id,
-            status: req.status,
-            accountKey: req.accountKey,
-            amount: req.amount,
-            reviewedBy: req.reviewedBy,
-            reviewedAt: req.reviewedAt
+          const res = await fetch(`${API_BASE}/api/admin/topup/requests/${encodeURIComponent(requestId)}/reject`, {
+            method: 'POST',
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ reviewedBy: 'Admin', reason: 'ปฏิเสธโดยผู้ดูแลระบบ' })
           });
+          const data = await res.json();
+
+          if (!res.ok || !data?.ok) {
+            if (msgEl) {
+              msgEl.style.color = '#dc2626';
+              msgEl.textContent = data?.message || `ปฏิเสธคำขอ ${requestId} ไม่สำเร็จ`;
+            }
+            return;
+          }
 
           if (msgEl) {
             msgEl.style.color = '#dc2626';
-            msgEl.textContent = `ปฏิเสธคำขอเติมเงิน ${req.id} แล้ว — ไม่มีการเพิ่มเครดิตให้ ${req.customerName}`;
+            msgEl.textContent = `ปฏิเสธคำขอเติมเงิน ${requestId} แล้ว — ไม่มีการเพิ่มเครดิตให้ ${req.customerName}`;
+          }
+
+          await syncBackendTopupRequests();
+          await syncBackendOverview();
+        } catch {
+          if (msgEl) {
+            msgEl.style.color = '#dc2626';
+            msgEl.textContent = `เชื่อมต่อเซิร์ฟเวอร์หลังบ้านไม่ได้ขณะปฏิเสธ ${requestId}`;
           }
         } finally {
           processingTopupIds.delete(requestId);
@@ -1509,11 +1464,6 @@
         }).join('');
       }
 
-      window.SomboonTopupBridge = {
-        submitTopupRequest: receiveTopupRequest,
-        getTopupRequests: () => adminState.topupRequests.map((r) => ({ ...r }))
-      };
-
       async function createOrderFromAdmin() {
         const msgEl = $('orderStatusMsg');
         const customerId = $('orderCustomerSelect')?.value;
@@ -1534,6 +1484,7 @@
         const newOrder = {
           id: 'ORD-' + Math.floor(1050 + Math.random() * 8900),
           customerId: customer.id,
+          accountKey: customer.key,
           customerName: customer.name,
           detail,
           amount,
@@ -1544,15 +1495,13 @@
         };
 
         adminState.orders.unshift(newOrder);
-        await AdminDataAdapter.createOrder(newOrder);
-
         if ($('orderAmountInput')) $('orderAmountInput').value = '';
         if ($('orderDescInput')) $('orderDescInput').value = '';
         if ($('orderRefUrlInput')) $('orderRefUrlInput').value = '';
 
         if (msgEl) {
           msgEl.style.color = '#d97706';
-          msgEl.textContent = `สร้างออเดอร์ ${newOrder.id} ยอด ฿${money(amount)} แล้ว — เครดิตของ ${customer.name} ยังไม่ถูกหัก (รอแอดมินกดรับออเดอร์)`;
+          msgEl.textContent = `สร้างออเดอร์ ${newOrder.id} ยอด ฿${money(amount)} แล้ว`;
         }
         renderAll();
       }
@@ -1572,14 +1521,14 @@
           return;
         }
 
-        const customer = findCustomerById(order.customerId);
+        const customer = findCustomerById(order.customerId) || findCustomerByAccountKey(order.accountKey);
         const orderAmount = Number(order.amount) || 0;
         const currentCredit = Number(customer?.credit) || 0;
 
         if (!customer || currentCredit < orderAmount) {
           if (msgEl) {
             msgEl.style.color = '#dc2626';
-            msgEl.textContent = `รับออเดอร์ ${order.id} ไม่ได้: เครดิตคงเหลือ ฿${money(currentCredit)} ไม่เพียงพอกับยอดเต็มจำนวน ฿${money(orderAmount)} (กรุณาเติมเครดิตก่อน)`;
+            msgEl.textContent = `รับออเดอร์ ${order.id} ไม่ได้: เครดิตคงเหลือ ฿${money(currentCredit)} ไม่เพียงพอกับยอดเต็มจำนวน ฿${money(orderAmount)}`;
           }
           return;
         }
@@ -1604,11 +1553,9 @@
           };
           adminState.payments.unshift(paymentRecord);
 
-          await AdminDataAdapter.acceptOrderAndDeduct(order, paymentRecord);
-
           if (msgEl) {
             msgEl.style.color = '#059669';
-            msgEl.textContent = `รับออเดอร์ ${order.id} สำเร็จ — หักเครดิตเต็มจำนวน ฿${money(orderAmount)} ของ ${customer.name} แล้ว (คงเหลือ ฿${money(customer.credit)})`;
+            msgEl.textContent = `รับออเดอร์ ${order.id} สำเร็จ — หักเครดิตเต็มจำนวน ฿${money(orderAmount)} ของ ${customer.name} แล้ว`;
           }
         } finally {
           processingOrderIds.delete(orderId);
@@ -1625,11 +1572,11 @@
         const prevOrderVal = $('orderCustomerSelect')?.value;
 
         if ($('creditCustomerSelect')) {
-          $('creditCustomerSelect').innerHTML = opts;
+          $('creditCustomerSelect').innerHTML = opts || '<option value="">ยังไม่มีลูกค้าในระบบ</option>';
           if (prevCreditVal && findCustomerById(prevCreditVal)) $('creditCustomerSelect').value = prevCreditVal;
         }
         if ($('orderCustomerSelect')) {
-          $('orderCustomerSelect').innerHTML = opts;
+          $('orderCustomerSelect').innerHTML = opts || '<option value="">ยังไม่มีลูกค้าในระบบ</option>';
           if (prevOrderVal && findCustomerById(prevOrderVal)) $('orderCustomerSelect').value = prevOrderVal;
         }
       }
@@ -1643,7 +1590,7 @@
         const pendingOrders = adminState.orders.filter((o) => o.status === 'รอรับออเดอร์');
 
         if ($('kpiOrdersCount')) $('kpiOrdersCount').textContent = `${adminState.orders.length} รายการ`;
-        if ($('kpiPendingNote')) $('kpiPendingNote').textContent = `รอรับออเดอร์ ${pendingOrders.length} รายการ (ยังไม่หักเครดิต)`;
+        if ($('kpiPendingNote')) $('kpiPendingNote').textContent = `รอรับออเดอร์ ${pendingOrders.length} รายการ`;
         if ($('kpiCustomersCount')) $('kpiCustomersCount').textContent = `${adminState.customers.length} ราย`;
         if ($('kpiTotalCredit')) $('kpiTotalCredit').textContent = `฿${money(totalCredit)}`;
         if ($('kpiPaymentsCount')) $('kpiPaymentsCount').textContent = `${adminState.payments.length} รายการ`;
@@ -1653,11 +1600,11 @@
             const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
             return `<tr>
               <td>${esc(o.id)}</td>
-              <td>${esc(o.customerName)}</td>
+              <td>${esc(o.customerName || o.accountKey || '-')}</td>
               <td>฿${money(o.amount)}</td>
-              <td><span class="badge ${badgeClass}">${esc(o.status)}</span></td>
+              <td><span class="badge ${badgeClass}">${esc(o.status || '-')}</span></td>
             </tr>`;
-          }).join('');
+          }).join('') || '<tr><td colspan="4" style="text-align:center;color:#64748b;">ยังไม่มีข้อมูลคำสั่งซื้อ</td></tr>';
         }
 
         if ($('dashCustomersBody')) {
@@ -1669,7 +1616,7 @@
               <td>฿${money(c.credit)}</td>
               <td><span class="badge ${bClass}">${esc(c.status)}</span></td>
             </tr>`;
-          }).join('');
+          }).join('') || '<tr><td colspan="4" style="text-align:center;color:#64748b;">ยังไม่มีข้อมูลลูกค้าในฐานข้อมูลกลาง</td></tr>';
         }
 
         if ($('customersTableBody')) {
@@ -1677,7 +1624,7 @@
             const bClass = Number(c.credit) > 0 ? 'b-ok' : 'b-wait';
             return `<tr>
               <td>${esc(c.id)}</td>
-              <td>${esc(c.name)} <span class="badge b-wait">ตัวอย่าง</span></td>
+              <td>${esc(c.name)}</td>
               <td>${esc(c.contact)}</td>
               <td><strong>฿${money(c.credit)}</strong></td>
               <td><span class="badge ${bClass}">${esc(c.status)}</span></td>
@@ -1686,19 +1633,19 @@
                 <button type="button" class="btn btn-primary js-go-frontend" data-cid="${esc(c.id)}" style="padding:5px 10px;font-size:12px;">เปิดหน้าบ้าน</button>
               </td>
             </tr>`;
-          }).join('');
+          }).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;">ยังไม่มีลูกค้าในฐานข้อมูลกลาง</td></tr>';
         }
 
         if ($('ordersTableBody')) {
           $('ordersTableBody').innerHTML = adminState.orders.map((o) => {
-            const cust = findCustomerById(o.customerId);
+            const cust = findCustomerById(o.customerId) || findCustomerByAccountKey(o.accountKey);
             const custCredit = Number(cust?.credit) || 0;
             const isWaiting = o.status === 'รอรับออเดอร์' && !o.creditDeducted;
             const isBusy = processingOrderIds.has(o.id);
             const canAfford = custCredit >= (Number(o.amount) || 0);
             const badgeClass = o.creditDeducted ? 'b-ok' : 'b-wait';
 
-            let actionHtml = `<span class="badge b-info">หักเครดิตแล้ว</span>`;
+            let actionHtml = `<span class="badge b-info">${esc(o.status || 'รับแล้ว')}</span>`;
             if (isWaiting) {
               actionHtml = `<button type="button" class="btn btn-success js-accept-order" data-oid="${esc(o.id)}" ${isBusy ? 'disabled' : ''} style="padding:5px 10px;font-size:12px;">${isBusy ? 'กำลังรับ...' : 'รับออเดอร์ & หักเครดิต'}</button>`;
               if (!canAfford) {
@@ -1708,14 +1655,14 @@
 
             return `<tr>
               <td>${esc(o.id)}</td>
-              <td>${esc(o.customerName)}</td>
-              <td>${esc(o.detail)}</td>
+              <td>${esc(o.customerName || o.accountKey || '-')}</td>
+              <td>${esc(o.detail || o.name || '-')}</td>
               <td>฿${money(o.amount)}</td>
               <td>฿${money(custCredit)}</td>
-              <td><span class="badge ${badgeClass}">${esc(o.status)}</span></td>
+              <td><span class="badge ${badgeClass}">${esc(o.status || '-')}</span></td>
               <td>${actionHtml}</td>
             </tr>`;
-          }).join('');
+          }).join('') || '<tr><td colspan="7" style="text-align:center;color:#64748b;">ยังไม่มีคำสั่งซื้อ</td></tr>';
         }
 
         if ($('paymentsTableBody')) {
@@ -1725,13 +1672,13 @@
             const sign = amt >= 0 ? '+' : '-';
             return `<tr>
               <td>${esc(p.id)}</td>
-              <td>${esc(p.customerName)}</td>
-              <td>${esc(p.refId)}</td>
-              <td>${esc(p.type)}</td>
+              <td>${esc(p.customerName || p.accountKey || '-')}</td>
+              <td>${esc(p.refId || '-')}</td>
+              <td>${esc(p.type || '-')}</td>
               <td style="color:${color};font-weight:600;">${sign}฿${money(Math.abs(amt))}</td>
-              <td><span class="badge b-ok">${esc(p.status)}</span></td>
+              <td><span class="badge b-ok">${esc(p.status || 'สำเร็จ')}</span></td>
             </tr>`;
-          }).join('');
+          }).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;">ยังไม่มีประวัติธุรกรรม</td></tr>';
         }
       }
 
@@ -1766,9 +1713,11 @@
         topTitle.textContent = pageMeta[pageKey];
         if (pageKey === 'customers') {
           renderFrontendCustomersSection();
+          syncBackendOverview();
         }
         if (pageKey === 'payments') {
-          renderTopupRequestsSection();
+          syncBackendTopupRequests();
+          syncBackendOverview();
         }
         closeDrawer();
       }
@@ -1791,10 +1740,12 @@
 
       $('refreshFrontendCustomersBtn')?.addEventListener('click', () => {
         renderFrontendCustomersSection();
+        syncBackendOverview();
       });
 
       $('refreshTopupRequestsBtn')?.addEventListener('click', () => {
-        renderTopupRequestsSection();
+        syncBackendTopupRequests();
+        syncBackendOverview();
       });
 
       $('topupFilterGroup')?.addEventListener('click', (e) => {
@@ -1854,7 +1805,7 @@
       });
 
       $('openFrontendBtn')?.addEventListener('click', () => {
-        adminState.frontendUrl = ($('frontUrlInput')?.value || './index.html').trim() || './index.html';
+        adminState.frontendUrl = ($('frontUrlInput')?.value || './เทสsomboon-express-fixed.html').trim() || './เทสsomboon-express-fixed.html';
         openFrontendPortal($('creditCustomerSelect').value);
       });
 
@@ -1868,7 +1819,7 @@
         }
         const goBtn = e.target.closest('.js-go-frontend');
         if (goBtn) {
-          adminState.frontendUrl = ($('frontUrlInput')?.value || './index.html').trim() || './index.html';
+          adminState.frontendUrl = ($('frontUrlInput')?.value || './เทสsomboon-express-fixed.html').trim() || './เทสsomboon-express-fixed.html';
           openFrontendPortal(goBtn.dataset.cid);
         }
       });
@@ -1882,6 +1833,21 @@
         }
       });
 
+      if ($('setAdminKey')) {
+        $('setAdminKey').value = savedAdminKey;
+      }
+
+      $('saveAdminKeyBtn')?.addEventListener('click', () => {
+        savedAdminKey = String($('setAdminKey')?.value || '').trim();
+        localStorage.setItem('somboon_admin_key', savedAdminKey);
+        syncBackendTopupRequests();
+        syncBackendOverview();
+        if (setBanner) {
+          setBanner.textContent = 'บันทึก ADMIN_KEY และรีเฟรชข้อมูลจากฐานข้อมูลกลางแล้ว';
+          setBanner.classList.add('show');
+        }
+      });
+
       const previewRateBtn = document.getElementById('previewRateBtn');
       const rateBanner = document.getElementById('rateBanner');
       if (previewRateBtn && rateBanner) {
@@ -1890,7 +1856,7 @@
           const kg = document.getElementById('rateKg').value;
           const cbm = document.getElementById('rateCbm').value;
           const sea = document.getElementById('rateSea').value;
-          rateBanner.textContent = `ตัวอย่างค่าที่กรอก (ยังไม่บันทึกลงระบบ): เรท ${fx} บาท/หยวน, รถ ${kg} บาท/กก., รถ ${cbm} บาท/CBM, เรือ ${sea} บาท/CBM`;
+          rateBanner.textContent = `ตัวอย่างค่าที่กรอก: เรท ${fx} บาท/หยวน, รถ ${kg} บาท/กก., รถ ${cbm} บาท/CBM, เรือ ${sea} บาท/CBM`;
           rateBanner.classList.add('show');
         });
       }
@@ -1900,13 +1866,15 @@
       if (previewSetBtn && setBanner) {
         previewSetBtn.addEventListener('click', () => {
           const brand = document.getElementById('setBrand').value;
-          const mode = document.getElementById('setMode').value;
-          setBanner.textContent = `ตัวอย่างค่าในฟอร์ม (ยังไม่บันทึกลงระบบ): แบรนด์ "${brand}" | โหมด "${mode}"`;
+          const hasKey = savedAdminKey ? 'ตั้งค่าแล้ว' : 'ไม่ได้ตั้งค่า';
+          setBanner.textContent = `แบรนด์ "${brand}" | ADMIN_KEY: ${hasKey}`;
           setBanner.classList.add('show');
         });
       }
 
       renderAll();
+      syncBackendTopupRequests();
+      syncBackendOverview();
     })();
   </script>
 </body>
